@@ -1,0 +1,24 @@
+prabhavdogra:
+  name: Prabhav Dogra
+  title: Software Engineer II @ Blinkit
+  url: https://github.com/prabhavdogra
+  image_url: https://media.licdn.com/dms/image/v2/D5603AQGHJzJ1YVb_og/profile-displayphoto-shrink_800_800/B56ZS6fOAFHEAc-/0/1738295534859?e=1746057600&v=beta&t=wTqgffLNqUVaz0xEk2OUDSEvKATaSevxvWuI99mG9XY
+  page: true
+  socials:
+    github: prabhavdogra
+    linkedin: prabhav-dogra
+
+slorber:
+  name: Sébastien Lorber
+  title: Docusaurus maintainer
+  url: https://sebastienlorber.com
+  image_url: https://github.com/slorber.png
+  page:
+    # customize the url of the author page at /blog/authors/<permalink>
+    permalink: '/all-sebastien-lorber-articles'
+  socials:
+    x: sebastienlorber
+    linkedin: sebastienlorber
+    github: prabhavdogra
+
+    newsletter: https://thisweekinreact.com
