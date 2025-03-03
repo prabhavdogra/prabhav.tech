@@ -10,9 +10,15 @@ This question popped up in my head, _"How Go atomic operations avoid race condit
 
 I finally gathered the courage to open the cloned [Go Github repo](https://github.com/golang/go) and scan through it.
 
+
+### Go Code Structure 
+![Go code structure](go_structure.png)
+
+_Source: ChatGPT_
+
 I went inside the implementation of `CompareAndSwapInt32` and found this:
 
-```go
+```go title="src/sync/atomic/doc.go"
 // CompareAndSwapInt32 executes the compare-and-swap operation for an int32 value.
 // Consider using the more ergonomic and less error-prone [Int32.CompareAndSwap] instead.
 //
@@ -20,17 +26,11 @@ I went inside the implementation of `CompareAndSwapInt32` and found this:
 func CompareAndSwapInt32(addr *int32, old, new int32) (swapped bool)
 ```
 
-Finding the implementation of this was not straightforward, because this methods is implemented in Go Assembly:
+Finding the implementation of this was not straightforward, because this method is implemented in Go Assembly:
 ```go title="src/sync/atomic/asm.s"
 TEXT ·CompareAndSwapInt32(SB),NOSPLIT,$0
 	JMP	internal∕runtime∕atomic·Cas(SB)
 ```
-
-
-### Go Code Structure 
-![Go code structure](go_structure.png)
-
-_Source: ChatGPT_
 
 ### What's Go Assembly?
 Simply put, **Go Assembly** is the low-level language used to write performance-critical functions in Go.
@@ -136,3 +136,5 @@ At the register level, atomicity is achieved because:
 - The LOCK prefix serializes access across CPU cores.
 - CMPXCHGL ensures all three steps (compare, swap, write-back) happen as one unit.
 - The CPU guarantees atomicity, eliminating race conditions without software locks.
+
+Feel free to be curious and figure out the answers to your questions on your own.
