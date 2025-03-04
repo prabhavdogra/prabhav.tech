@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="utf-8"?><?xml-stylesheet type="text/xsl" href="rss.xsl"?>
+<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+    <channel>
+        <title>Hello! Blog</title>
+        <link>https://prabhavdogra.github.io/prabhav.tech/blog</link>
+        <description>Hello! Blog</description>
+        <lastBuildDate>Sat, 01 Mar 2025 00:00:00 GMT</lastBuildDate>
+        <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
+        <generator>https://github.com/jpmonette/feed</generator>
+        <language>en</language>
+        <item>
+            <title><![CDATA[Writing your own Goroutines]]></title>
+            <link>https://prabhavdogra.github.io/prabhav.tech/blog/diy_goroutines</link>
+            <guid>https://prabhavdogra.github.io/prabhav.tech/blog/diy_goroutines</guid>
+            <pubDate>Sat, 01 Mar 2025 00:00:00 GMT</pubDate>
+            <description><![CDATA[This all started when someone asked me how goroutines work internally and all I could respond with was:]]></description>
+            <content:encoded><![CDATA[<p>This all started when someone asked me how goroutines work internally and all I could respond with was:</p>
+<blockquote>
+<p>"Goroutines are lightweight threads managed by the Go runtime instead of the operating system. Go runtime automatically multiplexes—mapping multiple goroutines onto a smaller number of OS threads. And that somehow makes them fast?? 👉👈"</p>
+</blockquote>
+<p>If anyone asked me any in-depth questions about how this multiplexing worked I was blank. So I decided to gain a deeper understanding by implementing goroutines myself. Cloned the <a href="https://github.com/golang/go" target="_blank" rel="noopener noreferrer">Go Github repo</a></p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="to-be-continued">To be continued...<a href="https://prabhavdogra.github.io/prabhav.tech/blog/diy_goroutines#to-be-continued" class="hash-link" aria-label="Direct link to To be continued..." title="Direct link to To be continued...">​</a></h2>]]></content:encoded>
+            <category>Go</category>
+        </item>
+        <item>
+            <title><![CDATA[How Go atomic operations avoid race conditions?]]></title>
+            <link>https://prabhavdogra.github.io/prabhav.tech/blog/atomic_operations</link>
+            <guid>https://prabhavdogra.github.io/prabhav.tech/blog/atomic_operations</guid>
+            <pubDate>Fri, 28 Feb 2025 00:00:00 GMT</pubDate>
+            <description><![CDATA[Introduction]]></description>
+            <content:encoded><![CDATA[<h3 class="anchor anchorWithStickyNavbar_LWe7" id="introduction">Introduction<a href="https://prabhavdogra.github.io/prabhav.tech/blog/atomic_operations#introduction" class="hash-link" aria-label="Direct link to Introduction" title="Direct link to Introduction">​</a></h3>
+<p>This question popped up in my head, <em>"How Go atomic operations avoid race conditions?"</em></p>
+<p>I finally gathered the courage to open the cloned <a href="https://github.com/golang/go" target="_blank" rel="noopener noreferrer">Go Github repo</a> and scan through it.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="go-code-structure">Go Code Structure<a href="https://prabhavdogra.github.io/prabhav.tech/blog/atomic_operations#go-code-structure" class="hash-link" aria-label="Direct link to Go Code Structure" title="Direct link to Go Code Structure">​</a></h3>
+<p><img decoding="async" loading="lazy" alt="Go code structure" src="https://prabhavdogra.github.io/prabhav.tech/assets/images/go_structure-7a1da1e54c9b5a7c7c73d3360e7c4c52.png" width="614" height="491" class="img_ev3q"></p>
+<p><em>Source: ChatGPT</em></p>
+<p>I went inside the implementation of <code>CompareAndSwapInt32</code> and found this:</p>
+<div class="language-go codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockTitle_Ktv7">src/sync/atomic/doc.go</div><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-go codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token comment" style="color:#999988;font-style:italic">// CompareAndSwapInt32 executes the compare-and-swap operation for an int32 value.</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token comment" style="color:#999988;font-style:italic">// Consider using the more ergonomic and less error-prone [Int32.CompareAndSwap] instead.</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token comment" style="color:#999988;font-style:italic">//</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token comment" style="color:#999988;font-style:italic">//go:noescape</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token keyword" style="color:#00009f">func</span><span class="token plain"> </span><span class="token function" style="color:#d73a49">CompareAndSwapInt32</span><span class="token punctuation" style="color:#393A34">(</span><span class="token plain">addr </span><span class="token operator" style="color:#393A34">*</span><span class="token builtin">int32</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> old</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> </span><span class="token builtin">new</span><span class="token plain"> </span><span class="token builtin">int32</span><span class="token punctuation" style="color:#393A34">)</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">(</span><span class="token plain">swapped </span><span class="token builtin">bool</span><span class="token punctuation" style="color:#393A34">)</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<p>Finding the implementation of this was not straightforward, because this method is implemented in Go Assembly:</p>
+<div class="language-go codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockTitle_Ktv7">src/sync/atomic/asm.s</div><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-go codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">TEXT ·</span><span class="token function" style="color:#d73a49">CompareAndSwapInt32</span><span class="token punctuation" style="color:#393A34">(</span><span class="token plain">SB</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain">NOSPLIT</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain">$</span><span class="token number" style="color:#36acaa">0</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">	JMP	internal∕runtime∕atomic·</span><span class="token function" style="color:#d73a49">Cas</span><span class="token punctuation" style="color:#393A34">(</span><span class="token plain">SB</span><span class="token punctuation" style="color:#393A34">)</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="whats-go-assembly">What's Go Assembly?<a href="https://prabhavdogra.github.io/prabhav.tech/blog/atomic_operations#whats-go-assembly" class="hash-link" aria-label="Direct link to What's Go Assembly?" title="Direct link to What's Go Assembly?">​</a></h3>
+<p>Simply put, <strong>Go Assembly</strong> is the low-level language used to write performance-critical functions in Go.
+<strong>Go Assembler</strong> (Code directory path: cmd/asm) is the tool that compiles <strong>Go assembly (.s) files</strong> into machine code.
+The Go assembler was heavily inspired by the <a href="https://9p.io/sys/doc/compiler.html" target="_blank" rel="noopener noreferrer">Plan 9 C compilers</a>.</p>
+<div class="theme-admonition theme-admonition-note admonition_xJq3 alert alert--secondary"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"></path></svg></span>Plan 9 C compilers</div><div class="admonitionContent_BuS1"><p><strong>Plan 9 C compilers (6c, 8c, 5c, etc.)</strong> were architecture-specific compilers designed to generate optimized code for different CPU architectures. Unlike GCC or LLVM, which support multiple architectures within a single compiler framework, Plan 9 used separate compilers for different instruction sets. These compilers were originally developed for the Plan 9 operating system, an experimental OS designed as a potential successor to Unix-based systems.</p><p>You can read more about it here: <a href="https://9p.io/sys/doc/compiler.html" target="_blank" rel="noopener noreferrer">https://9p.io/sys/doc/compiler.html</a></p></div></div>
+<p>Go drew inspiration from 9 C Compiler:</p>
+<ul>
+<li>Just like <strong>Plan 9</strong> had <strong>separate compilers</strong> for <strong>different architectures</strong> (e.g., 6c for x86-64, 8c for ARM, etc.).</li>
+<li>Go’s assembler follows a similar architecture-based approach, instead of a universal assembler Go has different assemblers for x86, ARM, RISC-V, etc.</li>
+</ul>
+<p>You can watch this, an interesting talk about <a href="https://www.youtube.com/watch?v=KINIAgRpkDA" target="_blank" rel="noopener noreferrer">Go Assembler</a> presented by Rob Pike himself.</p>
+<p><a href="https://go.dev/doc/asm" target="_blank" rel="noopener noreferrer">Go Assembler Documentation</a></p>
+<p>Go Assembler streamlined a lot of things:</p>
+<ul>
+<li><strong>Portability:</strong> It abstracts CPU architecture details better.</li>
+<li><strong>Simpler syntax:</strong> No need for % prefixes, brackets, or complex addressing.</li>
+<li><strong>Unified across architectures:</strong> ARM, AMD64, RISC-V, etc., use the same structure.</li>
+<li><strong>Designed for the Go runtime:</strong> Helps implement Go features like garbage collection, goroutines, and stack growth efficiently.</li>
+</ul>
+<p>Go Assembler has 4 architecture-specific implementations of <code>atomic.CompareAndSwapInt32()</code>:</p>
+<ul>
+<li><strong>amd64.s</strong>: For AMD64 (x86-64) architecture (Intel, AMD CPUs).</li>
+<li><strong>arm64.s:</strong> For ARM64 (AArch64) processors (used in Apple M1/M2, mobile devices, servers).</li>
+<li><strong>ppc64le.s:</strong> For PowerPC 64-bit, Little Endian (used in IBM systems).</li>
+<li><strong>s390x.s:</strong> For IBM Z-series mainframes (used in enterprise computing).</li>
+</ul>
+<p>Go runs on multiple architectures, and low-level atomic operations must be natively implemented for each to ensure compatibility.</p>
+<p>Added the implementations for one architecture (other 3 are similar) in Go Assembly:</p>
+<div class="language-go codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockTitle_Ktv7">src/internal/runtime/atomic/atomic_amd64.s</div><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-go codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token comment" style="color:#999988;font-style:italic">// bool Cas(int32 *val, int32 old, int32 new)</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token comment" style="color:#999988;font-style:italic">// Atomically:</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token comment" style="color:#999988;font-style:italic">//	if(*val == old){</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token comment" style="color:#999988;font-style:italic">//		*val = new;</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token comment" style="color:#999988;font-style:italic">//		return 1;</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token comment" style="color:#999988;font-style:italic">//	} else</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token comment" style="color:#999988;font-style:italic">//		return 0;</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token comment" style="color:#999988;font-style:italic">//  }</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">TEXT ·</span><span class="token function" style="color:#d73a49">Cas</span><span class="token punctuation" style="color:#393A34">(</span><span class="token plain">SB</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain">NOSPLIT</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain">$</span><span class="token number" style="color:#36acaa">0</span><span class="token operator" style="color:#393A34">-</span><span class="token number" style="color:#36acaa">17</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">	MOVQ	ptr</span><span class="token operator" style="color:#393A34">+</span><span class="token function" style="color:#d73a49">0</span><span class="token punctuation" style="color:#393A34">(</span><span class="token plain">FP</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> BX</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">	MOVL	old</span><span class="token operator" style="color:#393A34">+</span><span class="token function" style="color:#d73a49">8</span><span class="token punctuation" style="color:#393A34">(</span><span class="token plain">FP</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> AX</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">	MOVL	</span><span class="token builtin">new</span><span class="token operator" style="color:#393A34">+</span><span class="token function" style="color:#d73a49">12</span><span class="token punctuation" style="color:#393A34">(</span><span class="token plain">FP</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> CX</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">	LOCK</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">	CMPXCHGL	CX</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> </span><span class="token function" style="color:#d73a49">0</span><span class="token punctuation" style="color:#393A34">(</span><span class="token plain">BX</span><span class="token punctuation" style="color:#393A34">)</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">	SETEQ	ret</span><span class="token operator" style="color:#393A34">+</span><span class="token function" style="color:#d73a49">16</span><span class="token punctuation" style="color:#393A34">(</span><span class="token plain">FP</span><span class="token punctuation" style="color:#393A34">)</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">	RET</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<p>Explaining this line by line how this maintains atomicity.</p>
+<div class="language-go codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-go codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">TEXT ·</span><span class="token function" style="color:#d73a49">Cas</span><span class="token punctuation" style="color:#393A34">(</span><span class="token plain">SB</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain">NOSPLIT</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain">$</span><span class="token number" style="color:#36acaa">0</span><span class="token operator" style="color:#393A34">-</span><span class="token number" style="color:#36acaa">17</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<ul>
+<li><code>TEXT ·Cas(SB)</code>: Declares the function Cas(CompareAndSwap) in Go assembly.</li>
+<li><code>NOSPLIT</code>: Instructs the runtime not to perform stack splitting, ensuring that the function runs without interruption. It tells the Go runtime not to perform stack splitting for that function.</li>
+<li><code>$0-17:</code> Specifies the stack frame size for the function (0 bytes for local variables and 17 bytes for arguments/return values).</li>
+</ul>
+<div class="language-go codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-go codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">MOVQ ptr</span><span class="token operator" style="color:#393A34">+</span><span class="token function" style="color:#d73a49">0</span><span class="token punctuation" style="color:#393A34">(</span><span class="token plain">FP</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> BX</span><span class="token punctuation" style="color:#393A34">:</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<ul>
+<li>Moves the pointer <code>ptr</code> (the address of val) from the function's frame pointer (FP) into the <code>BX</code> register.</li>
+</ul>
+<div class="language-go codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-go codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">MOVL old</span><span class="token operator" style="color:#393A34">+</span><span class="token function" style="color:#d73a49">8</span><span class="token punctuation" style="color:#393A34">(</span><span class="token plain">FP</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> AX</span><span class="token punctuation" style="color:#393A34">:</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<ul>
+<li>Moves the old value from the frame pointer into the <code>AX</code> register.</li>
+</ul>
+<div class="language-go codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-go codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">MOVL </span><span class="token builtin">new</span><span class="token operator" style="color:#393A34">+</span><span class="token function" style="color:#d73a49">12</span><span class="token punctuation" style="color:#393A34">(</span><span class="token plain">FP</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> CX</span><span class="token punctuation" style="color:#393A34">:</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<ul>
+<li>Moves the new value from the frame pointer into the <code>CX</code> register.</li>
+</ul>
+<div class="language-go codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-go codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">LOCK</span><span class="token punctuation" style="color:#393A34">:</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<ul>
+<li>This is a crucial instruction. It prefixes the next instruction (CMPXCHGL) with a lock, ensuring that the memory operation is atomic. This lock ensures that no other process or thread can modify the memory location while the compare and exchange instruction is running.</li>
+</ul>
+<div class="language-go codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-go codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">CMPXCHGL CX</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> </span><span class="token function" style="color:#d73a49">0</span><span class="token punctuation" style="color:#393A34">(</span><span class="token plain">BX</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">:</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<ul>
+<li>This is the Compare and Exchange instruction. It performs the following:<!-- -->
+<ul>
+<li>Compares the value in AX (the old value) with the value at the memory location pointed to by BX (the val value).</li>
+<li>If the values are equal, it replaces the value at 0(BX) with the value in CX (the new value).</li>
+<li>The original value at 0(BX) is loaded into the AX register.</li>
+</ul>
+</li>
+</ul>
+<div class="language-go codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-go codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">SETEQ ret</span><span class="token operator" style="color:#393A34">+</span><span class="token function" style="color:#d73a49">16</span><span class="token punctuation" style="color:#393A34">(</span><span class="token plain">FP</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">:</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<ul>
+<li>SETEQ sets the byte at the destination to 1 if the zero flag is set, and to 0 otherwise. In this case, it sets the return value to 1 if the comparison was equal (meaning the swap was successful), and to 0 otherwise.</li>
+</ul>
+<div class="language-go codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-go codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">RET</span><span class="token punctuation" style="color:#393A34">:</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<ul>
+<li>Returns from the function</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="conclusion">Conclusion<a href="https://prabhavdogra.github.io/prabhav.tech/blog/atomic_operations#conclusion" class="hash-link" aria-label="Direct link to Conclusion" title="Direct link to Conclusion">​</a></h3>
+<p>At the register level, atomicity is achieved because:</p>
+<ul>
+<li>The LOCK prefix serializes access across CPU cores.</li>
+<li>CMPXCHGL ensures all three steps (compare, swap, write-back) happen as one unit.</li>
+<li>The CPU guarantees atomicity, eliminating race conditions without software locks.</li>
+</ul>
+<p>Feel free to be curious and figure out the answers to your questions on your own.</p>]]></content:encoded>
+            <category>Go</category>
+        </item>
+        <item>
+            <title><![CDATA[Building a Ray Tracer in C++]]></title>
+            <link>https://prabhavdogra.github.io/prabhav.tech/blog/ray_tracer</link>
+            <guid>https://prabhavdogra.github.io/prabhav.tech/blog/ray_tracer</guid>
+            <pubDate>Thu, 27 Feb 2025 00:00:00 GMT</pubDate>
+            <description><![CDATA[This blog is just a quick summary of the book Ray Tracing in One Weekend]]></description>
+            <content:encoded><![CDATA[<p>This blog is just a quick summary of the book <a href="https://raytracing.github.io/books/RayTracingInOneWeekend.htmlRay" target="_blank" rel="noopener noreferrer">Ray Tracing in One Weekend</a></p>
+<p>Github Source Code: <a href="https://github.com/dograprabhav/ray_tracer" target="_blank" rel="noopener noreferrer">dograprabhav/ray_tracer</a></p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="whatre-we-gonna-make">What're we gonna make?<a href="https://prabhavdogra.github.io/prabhav.tech/blog/ray_tracer#whatre-we-gonna-make" class="hash-link" aria-label="Direct link to What're we gonna make?" title="Direct link to What're we gonna make?">​</a></h2>
+<p><img decoding="async" loading="lazy" alt="Final" src="https://prabhavdogra.github.io/prabhav.tech/assets/images/image-2-c18e085804d79caa3e3dc9aca26e4f9c.png" width="1200" height="675" class="img_ev3q"></p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="milestone-1">Milestone 1:<a href="https://prabhavdogra.github.io/prabhav.tech/blog/ray_tracer#milestone-1" class="hash-link" aria-label="Direct link to Milestone 1:" title="Direct link to Milestone 1:">​</a></h2>
+<p>Before starting anything, in this milestone we just create a sample image. To do that we use one of the simplest formats <strong>P3</strong>. <strong>P3</strong> is a plain text format for <strong>Portable Pixmap (PPM)</strong> image files. It is one of the simplest image formats, where pixel data is represented in plain text.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="p3-image-format">P3 Image Format<a href="https://prabhavdogra.github.io/prabhav.tech/blog/ray_tracer#p3-image-format" class="hash-link" aria-label="Direct link to P3 Image Format" title="Direct link to P3 Image Format">​</a></h3>
+<p>In P3, each pixel is defined by three integers corresponding to the red, green, and blue color channels. The first line of the output is "P3", identifying the file format. The second line contains the width and height of the image. The third line specifies the maximum color value (typically 255, representing the maximum intensity for each color channel).
+Each subsequent line contains three integers (r, g, b) for each pixel's color in the image.</p>
+<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockTitle_Ktv7">Sample P3 image of width 2 pixels and height 3 pixels</div><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">P3           // Defining format</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">2 3          // Width and Height</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">255          // Maximum color value</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">2 5 15       // (r, g, b) color intensity triplets</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">0 255 255    // (r, g, b) color intensity triplets</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">255 0 255    // (r, g, b) color intensity triplets</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">255 255 0    // (r, g, b) color intensity triplets</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">0 0 0        // (r, g, b) color intensity triplets</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">255 255 255  // (r, g, b) color intensity triplets</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<p>This image looks like: &nbsp; &nbsp; &nbsp; <img decoding="async" loading="lazy" alt="P3" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC0AAAA+CAYAAAC/WJKvAAABWWlDQ1BJQ0MgUHJvZmlsZQAAKJFtkE9LAlEUxY//MMpFUbRq4SKIwsLGxLVpVOBisKI/u3HGxkCnxzhS7Vq2aBl9hKhPYEFQHyEIFFq1rEWrQIiS6Tyt1OpdLufH4d7H5QDekCZE0Q+gZDl2dnE+vLG5FQ4+w8cKoQ9eTS+LpKpmOIJv7X2NGjxS76flX7g8ekvvV4KBWm028HTx8ne+5/Ub+bJO/WArurAdwBMlq3uOkHxIHrF5FPlEstnmc8m5Nl+3ZlazKfIdeVAvaAb5kRzJdflmF5eKFf3rBnl9KG+trVBH2WNIYwEZVhgqFCTYCpaY0f87c62dFHYhcAAbOzBRgMPtJB2BIvLkZVjQMYMIWUGUHZdZ/86w41nMOp4k1DueMQFcxYDhSMcb501Dx8DNlNBs7SdZT8Nf3o4pbR6oAoFT131dB4KTQLPuuu9V122eAb4H4LbxCcgTYdJmf7JmAAAAVmVYSWZNTQAqAAAACAABh2kABAAAAAEAAAAaAAAAAAADkoYABwAAABIAAABEoAIABAAAAAEAAAAtoAMABAAAAAEAAAA+AAAAAEFTQ0lJAAAAU2NyZWVuc2hvdIXQRJcAAAHUaVRYdFhNTDpjb20uYWRvYmUueG1wAAAAAAA8eDp4bXBtZXRhIHhtbG5zOng9ImFkb2JlOm5zOm1ldGEvIiB4OnhtcHRrPSJYTVAgQ29yZSA2LjAuMCI+CiAgIDxyZGY6UkRGIHhtbG5zOnJkZj0iaHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyI+CiAgICAgIDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PSIiCiAgICAgICAgICAgIHhtbG5zOmV4aWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20vZXhpZi8xLjAvIj4KICAgICAgICAgPGV4aWY6UGl4ZWxZRGltZW5zaW9uPjYyPC9leGlmOlBpeGVsWURpbWVuc2lvbj4KICAgICAgICAgPGV4aWY6UGl4ZWxYRGltZW5zaW9uPjQ1PC9leGlmOlBpeGVsWERpbWVuc2lvbj4KICAgICAgICAgPGV4aWY6VXNlckNvbW1lbnQ+U2NyZWVuc2hvdDwvZXhpZjpVc2VyQ29tbWVudD4KICAgICAgPC9yZGY6RGVzY3JpcHRpb24+CiAgIDwvcmRmOlJERj4KPC94OnhtcG1ldGE+Cqlau54AAAGaSURBVGgF7ZqxTsMwFEWd2ApbpwiExC+UMayt4BcY+DsYWPiIlJXO/QPGpBILEhLEIUFycPuMUVK/KJVulzjXz9dXJ69SozrKrrJaHNlHmbx1Pd3sURSZmD9X1YZdv6x3xCneNB0hTPhYaz3FjCRTm9N0Q1zr6baFndzOqWqxG/r07MKuHTw+eXwYvNYsfL25NsMm5W/O7ovYzTaD7du7fTtofL5cDlpnFkWrlRmSa0yUIxAQeqyHBNIg7SGA9vDACToF0kFxesxA2gMn6BRIB8XpMQNpD5ygU+Ql4Enei8VscfAmXzI7yONZfTTrN04PtIcTC4MI0gxQnZYg7cTCIII0A1SnJUg7sTCIIM0A1WkJ0k4sDCJIM0B1WpKXgNvPO1GWpbO4j2j/3dBnnamNdW6G5Ir2IEiYBJBmAktsQZogYRJAmgkssQVpgoRJAGkmsMQWpAkSJgGkmcASW/IS0FakaUoK+wp5/veP+L5e+/UkdFEU+zWTu0dPj/VIVHsUcn45F1VVCevo21j7/79Pc8xUSimSJOlqvwEQpD2eS5b2gwAAAABJRU5ErkJggg==" width="45" height="62" class="img_ev3q"></p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="milestone-1-results">Milestone 1 Results<a href="https://prabhavdogra.github.io/prabhav.tech/blog/ray_tracer#milestone-1-results" class="hash-link" aria-label="Direct link to Milestone 1 Results" title="Direct link to Milestone 1 Results">​</a></h3>
+<p>We write a simple loop to render this:</p>
+<p><img decoding="async" loading="lazy" alt="P3" src="https://prabhavdogra.github.io/prabhav.tech/assets/images/image-4-463cf3416dbae775d4b91e4780f4534a.png" width="300" height="300" class="img_ev3q"></p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="milestone-2">Milestone 2:<a href="https://prabhavdogra.github.io/prabhav.tech/blog/ray_tracer#milestone-2" class="hash-link" aria-label="Direct link to Milestone 2:" title="Direct link to Milestone 2:">​</a></h2>
+<p>In this milestone we setup a basic ray tracing setup.</p>
+<ul>
+<li>We setup a sphere in the scene.</li>
+<li>We setup light rays that detects object in the scene.</li>
+<li>On the basis of intersection of light rays and objects in the scene it detects what each pixel in the image should look like.</li>
+<li>Set up vector ray header files</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="how-it-works">How it works?<a href="https://prabhavdogra.github.io/prabhav.tech/blog/ray_tracer#how-it-works" class="hash-link" aria-label="Direct link to How it works?" title="Direct link to How it works?">​</a></h3>
+<p><img decoding="async" loading="lazy" alt="How it works?" src="https://prabhavdogra.github.io/prabhav.tech/assets/images/image-5-cda6bf641c9e71f881dfa2b3ff4ef22c.png" width="1502" height="1212" class="img_ev3q">
+This image represents the basic concept of a ray-tracing camera model used in computer graphics and rendering. Let’s break it down step by step:</p>
+<ul>
+<li>
+<p><strong>Camera and Viewport Setup</strong>: The camera center is the origin of the coordinate system. A viewport (camera screen/a plane) is placed in front of the camera at a certain focal length. The viewport is divided into a grid of pixels (X × Y), where each cell represents a pixel in the final rendered image.</p>
+</li>
+<li>
+<p><strong>Ray Tracing Process:</strong> For each pixel in the viewport grid</p>
+<ul>
+<li>A ray of light is cast from the camera center through the center of the pixel.</li>
+<li>The ray travels in the scene and intersects with objects (like the blue sphere in the diagram).</li>
+<li>If a ray hits an object, the rendering algorithm calculates the color of that pixel based on:<!-- -->
+<ul>
+<li>The material properties (color, reflectivity, transparency).</li>
+<li>Lighting conditions (shadows, reflections, refractions).</li>
+<li>Camera perspective.</li>
+</ul>
+</li>
+<li>The computed color is assigned to the corresponding pixel in the final image.</li>
+</ul>
+</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="sphere-ray-intersection">Sphere-Ray Intersection<a href="https://prabhavdogra.github.io/prabhav.tech/blog/ray_tracer#sphere-ray-intersection" class="hash-link" aria-label="Direct link to Sphere-Ray Intersection" title="Direct link to Sphere-Ray Intersection">​</a></h3>
+<p>This section explains the mathematical derivation for determining the intersection points between a ray and a sphere.</p>
+<p><strong>Sphere Equations</strong></p>
+<ul>
+<li><strong>Sphere centered at (0, 0, 0):</strong>
+<ul>
+<li><code>x² + y² + z² = r²</code></li>
+</ul>
+</li>
+<li><strong>Sphere centered at (Cx, Cy, Cz):</strong>
+<ul>
+<li><code>(Cx - x)² + (Cy - y)² + (Cz - z)² = r²</code></li>
+</ul>
+</li>
+</ul>
+<p><strong>Vector and Distance</strong></p>
+<ul>
+<li><strong>Vector from point A(x1, y1, z1) to B(x2, y2, z2):</strong>
+<ul>
+<li><code>(B - A) = (x2 - x1, y2 - y1, z2 - z1)</code></li>
+</ul>
+</li>
+<li><strong>Distance between points A and B:</strong>
+<ul>
+<li><code>d = √[(x2 - x1)² + (y2 - y1)² + (z2 - z1)²]</code></li>
+</ul>
+</li>
+<li><strong>Vector from point P(x, y, z) to center C(Cx, Cy, Cz):</strong>
+<ul>
+<li><code>(C - P) = (Cx - x, Cy - y, Cz - z)</code></li>
+</ul>
+</li>
+</ul>
+<p><strong>Point on Sphere Condition</strong></p>
+<p>For point P to lie on the sphere, it must be 'r' (radius) distance from the center:</p>
+<ul>
+<li><code>(C - P) ⋅ (C - P) = (Cx - x)² + (Cy - y)² + (Cz - z)²</code></li>
+<li><code>(Cx - x)² + (Cy - y)² + (Cz - z)² = r²</code> (Distance from center)</li>
+<li>Therefore: <code>(C - P) ⋅ (C - P) = r²</code></li>
+</ul>
+<p><strong>Ray Equation</strong></p>
+<ul>
+<li><strong>General ray equation:</strong> <code>RAY(t) = M * t + N</code>
+<ul>
+<li><code>M</code> is the ray's direction vector.</li>
+<li><code>N</code> is the ray's origin point.</li>
+</ul>
+</li>
+</ul>
+<p><strong>Ray-Sphere Intersection</strong></p>
+<p>A ray hits the sphere when it's 'r' distance from the center:</p>
+<ul>
+<li><code>(C - RAY(t)) ⋅ (C - RAY(t)) = r²</code></li>
+<li><code>(C - (M * t + N)) ⋅ (C - (M * t + N)) = r²</code></li>
+<li>Expanding the equation:<!-- -->
+<ul>
+<li><code>t² * M ⋅ M - 2 * t * M ⋅ (C - N) + (C - N) ⋅ (C - N) - r² = 0</code></li>
+</ul>
+</li>
+</ul>
+<p><strong>Quadratic Formula</strong></p>
+<p>Using the quadratic formula (<code>roots = -b ± √(b² - 4ac) / 2a</code>), we get:</p>
+<ul>
+<li><code>a = M ⋅ M</code></li>
+<li><code>b = -2 * M ⋅ (C - N)</code></li>
+<li><code>c = (C - N) ⋅ (C - N) - r²</code></li>
+</ul>
+<p>By solving this quadratic equation for 't', we can find the intersection points (if any) between the ray and the sphere.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="milestone-2-results">Milestone 2 Results<a href="https://prabhavdogra.github.io/prabhav.tech/blog/ray_tracer#milestone-2-results" class="hash-link" aria-label="Direct link to Milestone 2 Results" title="Direct link to Milestone 2 Results">​</a></h3>
+<p><img decoding="async" loading="lazy" alt="Milestone 2 results" src="https://prabhavdogra.github.io/prabhav.tech/assets/images/image-6-f29e84e0da7e7c516d122e69c21d9ea2.png" width="400" height="225" class="img_ev3q"></p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="milestone-3">Milestone 3:<a href="https://prabhavdogra.github.io/prabhav.tech/blog/ray_tracer#milestone-3" class="hash-link" aria-label="Direct link to Milestone 3:" title="Direct link to Milestone 3:">​</a></h2>
+<ul>
+<li>Scene Abstraction:<!-- -->
+<ul>
+<li>Introduced a Scene structure to manage all objects, lights, and properties in the environment.</li>
+<li>Simplifies the rendering process by treating the scene as a collection of objects instead of handling each separately.</li>
+</ul>
+</li>
+</ul>
+<p><strong>Result:</strong> The code is cleaner, modular, and easier to extend in the future (e.g., adding reflections, refractions, and different shapes).</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="milestone-3-results">Milestone 3 Results<a href="https://prabhavdogra.github.io/prabhav.tech/blog/ray_tracer#milestone-3-results" class="hash-link" aria-label="Direct link to Milestone 3 Results" title="Direct link to Milestone 3 Results">​</a></h3>
+<p><img decoding="async" loading="lazy" alt="Milestone 3 results" src="https://prabhavdogra.github.io/prabhav.tech/assets/images/image-7-b4a5cae6eb6ddedf38cfb98e8085cddf.png" width="400" height="225" class="img_ev3q"></p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="milestone-4">Milestone 4:<a href="https://prabhavdogra.github.io/prabhav.tech/blog/ray_tracer#milestone-4" class="hash-link" aria-label="Direct link to Milestone 4:" title="Direct link to Milestone 4:">​</a></h2>
+<p><strong>Rendering Improvements</strong></p>
+<ul>
+<li><strong>Added Anti-Aliasing</strong>
+<ul>
+<li>Reduced jagged edges in the final image by averaging multiple rays per pixel.</li>
+</ul>
+</li>
+<li><strong>Added Camera Class</strong>
+<ul>
+<li>Abstracted camera logic for better scene control.</li>
+</ul>
+</li>
+<li><strong>Started Considering Reflected Rays</strong>
+<ul>
+<li>Introduced initial logic for reflection to create mirror-like surfaces.</li>
+<li>Prepares the system for handling realistic light behavior.</li>
+</ul>
+</li>
+</ul>
+<p><strong>Material System Enhancements</strong></p>
+<ul>
+<li><strong>Added Material Class for Diffuse Material</strong>
+<ul>
+<li>Defined a reusable <code>Material</code> class to manage object properties.</li>
+<li>Simplified code structure by encapsulating material behavior.</li>
+</ul>
+</li>
+<li><strong>Added Material Class with Diffuse Material</strong>
+<ul>
+<li>Implemented Lambertian reflection for diffuse surfaces.</li>
+<li>Ensures objects interact naturally with light sources.</li>
+</ul>
+</li>
+<li><strong>Added True Lambertian Reflection</strong>
+<ul>
+<li>Improved light scattering on rough surfaces.</li>
+<li>Used a more accurate random sampling technique for diffuse reflections.</li>
+</ul>
+</li>
+<li><strong>Gamma Correction</strong>
+<ul>
+<li>Gamma Correction for More Realistic Colors</li>
+</ul>
+</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="anti-aliasing">Anti-aliasing<a href="https://prabhavdogra.github.io/prabhav.tech/blog/ray_tracer#anti-aliasing" class="hash-link" aria-label="Direct link to Anti-aliasing" title="Direct link to Anti-aliasing">​</a></h3>
+<ul>
+<li>Reduced jagged edges in the final image by averaging multiple rays per pixel.
+<img decoding="async" loading="lazy" alt="Anti-Aliasing" src="https://prabhavdogra.github.io/prabhav.tech/assets/images/image-8-1d5751270a7f1116e510fe8fe83e5642.png" width="400" height="276" class="img_ev3q"></li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="a-simple-diffuse-material">A Simple Diffuse Material<a href="https://prabhavdogra.github.io/prabhav.tech/blog/ray_tracer#a-simple-diffuse-material" class="hash-link" aria-label="Direct link to A Simple Diffuse Material" title="Direct link to A Simple Diffuse Material">​</a></h3>
+<p>A diffuse surface is a surface that scatters light in many directions instead of reflecting it in a single, well-defined direction (like a mirror). This happens because the surface is rough at a microscopic level.</p>
+<ul>
+<li>Some observations:<!-- -->
+<ul>
+<li>A light ray that bounces of a diffuse surface has equal probability of bouncing in all directions</li>
+<li>They might also be absorbed rather than reflected. The darker the surface, the more likely the ray is absorbed (that’s why it's dark!).</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>How we will do it:<!-- -->
+<ul>
+<li>Generate a random vector inside the unit sphere</li>
+<li>Normalize this vector to extend it to the sphere surface</li>
+<li>Invert the normalized vector if it falls onto the wrong hemisphere</li>
+</ul>
+</li>
+</ul>
+<p><img decoding="async" loading="lazy" alt="Generating randomised reflected rays" src="https://prabhavdogra.github.io/prabhav.tech/assets/images/image-a23df4ce23087930ddcc9c50d8b81085.png" width="400" height="421" class="img_ev3q"></p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="true-lambertian-reflection">True Lambertian Reflection<a href="https://prabhavdogra.github.io/prabhav.tech/blog/ray_tracer#true-lambertian-reflection" class="hash-link" aria-label="Direct link to True Lambertian Reflection" title="Direct link to True Lambertian Reflection">​</a></h3>
+<p>A more accurate representation of real diffuse objects is the Lambertian distribution. This distribution scatters reflected rays in a manner that is proportional to cos(𝜙), where 𝜙 is the angle between the reflected ray and the surface normal.</p>
+<p>This means that a reflected ray is most likely to scatter in a direction near the surface normal, and less likely to scatter in directions away from the normal.
+We do this by</p>
+<div class="language-c codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockTitle_Ktv7">src/v4/camera.h</div><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-c codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token comment" style="color:#999988;font-style:italic">// rec.normal is the normal to the hemisphere</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    vec3 direction </span><span class="token operator" style="color:#393A34">=</span><span class="token plain"> rec</span><span class="token punctuation" style="color:#393A34">.</span><span class="token plain">normal </span><span class="token operator" style="color:#393A34">+</span><span class="token plain"> </span><span class="token function" style="color:#d73a49">random_unit_vector</span><span class="token punctuation" style="color:#393A34">(</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">;</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="gamma-correction">Gamma Correction<a href="https://prabhavdogra.github.io/prabhav.tech/blog/ray_tracer#gamma-correction" class="hash-link" aria-label="Direct link to Gamma Correction" title="Direct link to Gamma Correction">​</a></h3>
+<ul>
+<li>Gamma Correction for More Realistic Colors<!-- -->
+<ul>
+<li>Raw pixel values in the renderer are stored in linear color space.</li>
+<li>Most displays, however, interpret color values in a non-linear way, requiring gamma correction.</li>
+<li>Gamma correction is applied using the equation:</li>
+</ul>
+<div class="codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">corrected color = raw color ^ (¹⁄ᵧ)</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<!-- -->where <strong>γ</strong> (gamma) is typically <strong>2.2</strong>.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="milestone-5">Milestone 5:<a href="https://prabhavdogra.github.io/prabhav.tech/blog/ray_tracer#milestone-5" class="hash-link" aria-label="Direct link to Milestone 5:" title="Direct link to Milestone 5:">​</a></h2>
+<p><strong>Metal</strong></p>
+<ul>
+<li>Add a new class to <strong>Material class</strong> for <strong>Metal object</strong></li>
+<li>Modelled light scatter and <strong>reflectance</strong>, enabling realistic surfaces.</li>
+<li>Added <strong>mirrored light reflection</strong> for metallic objects.</li>
+<li>Implemented <strong>fuzzy reflection</strong>, simulating rough metallic finishes.</li>
+</ul>
+<p><strong>Dielectrics</strong></p>
+<ul>
+<li>Explored refraction and how light bends through transparent materials.</li>
+<li>Used <strong>Snell’s Law</strong> to determine how rays change direction at surfaces.</li>
+<li>Introduced <strong>total internal reflection</strong>, where light stays within the medium.</li>
+<li>Implemented the <strong>Schlick Approximation</strong> for <strong>realistic reflection intensity</strong>.</li>
+</ul>
+<p><strong>Positionable Camera</strong></p>
+<ul>
+<li>Defines camera viewing geometry for perspective accuracy.</li>
+<li>Introduces controls for positioning and orienting the camera, improving scene setup.</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="metallic-surfaces-and-reflective-rays">Metallic Surfaces and Reflective Rays<a href="https://prabhavdogra.github.io/prabhav.tech/blog/ray_tracer#metallic-surfaces-and-reflective-rays" class="hash-link" aria-label="Direct link to Metallic Surfaces and Reflective Rays" title="Direct link to Metallic Surfaces and Reflective Rays">​</a></h3>
+<p>Introduces metallic materials by modifying how rays bounce off surfaces.
+Reflection is modeled using the equation:</p>
+<div class="codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">𝑅 = 𝑉 − 2 (𝑉 ⋅ 𝑁) 𝑁 </span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<p><img decoding="async" loading="lazy" alt="Mirrored reflection" src="https://prabhavdogra.github.io/prabhav.tech/assets/images/image-9-a2fa0faa5dc050189748bcd884318450.png" width="400" height="306" class="img_ev3q"></p>
+<ul>
+<li>Where,<!-- -->
+<ul>
+<li><strong>𝑅</strong> is the reflected ray,</li>
+<li><strong>𝑉</strong> is the incoming ray, and</li>
+<li><strong>𝑁</strong> is the surface normal.
+The reflected ray is traced to determine the color contribution from the metal.</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>Fuzziness in Reflection:<!-- -->
+<ul>
+<li>To simulate rough metal, a fuzziness parameter is introduced.</li>
+<li>Instead of perfect reflection, a small random offset is added to the reflected ray direction.</li>
+<li>The amount of fuzziness controls how polished or rough the surface appears.</li>
+</ul>
+</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="dielectrics">Dielectrics<a href="https://prabhavdogra.github.io/prabhav.tech/blog/ray_tracer#dielectrics" class="hash-link" aria-label="Direct link to Dielectrics" title="Direct link to Dielectrics">​</a></h3>
+<p>Clear materials such as water, glass, and diamond are dielectrics. When a light ray hits them, it splits into a reflected ray and a refracted (transmitted) ray. We’ll handle that by randomly choosing between reflection and refraction, only generating one scattered ray per interaction.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="snells-law">Snell's Law<a href="https://prabhavdogra.github.io/prabhav.tech/blog/ray_tracer#snells-law" class="hash-link" aria-label="Direct link to Snell's Law" title="Direct link to Snell's Law">​</a></h3>
+<p>Where 𝜃 and 𝜃′ are the angles from the normal, and 𝜂 and 𝜂′ are the refractive indices. The geometry is:</p>
+<div class="codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">⇒ 𝜂 ⋅ sin𝜃 = 𝜂′ ⋅ sin𝜃′</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<p>where:</p>
+<ul>
+<li><strong>𝜂</strong> — Refractive index of the first medium</li>
+<li><strong>𝜂′</strong> — Refractive index of the second medium</li>
+<li><strong>𝜃</strong> — Incident angle (angle between the incoming ray and the normal)</li>
+<li><strong>𝜃′</strong> — Refracted angle (angle between the refracted ray and the normal)</li>
+</ul>
+<p><img decoding="async" loading="lazy" alt="Snell&amp;#39;s Law" src="https://prabhavdogra.github.io/prabhav.tech/assets/images/image-1-c90a2fcd331cd757b9f29c65e4ce2722.png" width="421" height="358" class="img_ev3q"></p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="total-internal-reflection">Total Internal Reflection<a href="https://prabhavdogra.github.io/prabhav.tech/blog/ray_tracer#total-internal-reflection" class="hash-link" aria-label="Direct link to Total Internal Reflection" title="Direct link to Total Internal Reflection">​</a></h3>
+<p>Total Internal Reflection (TIR) occurs when light traveling from a <strong>denser medium</strong> to a <strong>less dense medium</strong> is <strong>completely reflected</strong> rather than refracted. This happens when the <strong>angle of incidence</strong> exceeds the <strong>critical angle</strong>, given by:</p>
+<div class="codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">theta = sin⁻¹(n₂ / n₁)</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<p><img decoding="async" loading="lazy" alt="TIR" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAADwCAIAAAA1lM7CAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAABLKADAAQAAAABAAAA8AAAAABfOcMaAAAgU0lEQVR4Ae2dTY7buNPG3S/+yxwgQC4wa9vrmRwgQA4w67bXc4EEyQVm7e51DjBADpBk3fZ6LjBADpB9v79i2TT1LbVtiaRKaTgURZHFp/SoyOKH7p6fnxd2GAKGwHQI/N90RVvJhoAhIAgYCe05MAQmRsBIOLECrHhDwEhoz4AhMDEC/5u4/HkX/+PHj2/fvtVi8OHDh1L8w8MDMZvNphRvp6kjYCScUoMw8OPHj7USVElYm8wiM0DASDilEt+9e/f27dspJbCyI0DASDilEpbLZW3xh8OhNt4is0TAHDNRqHW73d4Fx2q1ikIsE2IUBIyEo8DcWgh2D6eLWsXwt/Umu5gPAtYcnV6Xv379Qoj9fo8B/Pvvv1+9emWWcHqtjCiBWcIRwW4tiuGK9Xr95csXTWXdwla0srp4ZxO4Y9Anpg8G/vnnn3/88YfKU9WLjRPGoKlbyGDN0VugOjhP2qKYPjqEu93+58+vDF0MzsJuSBYBs4TJqs4EzwUB6xNGoUmGKGiRBoMUd1GIZUKMgoA1R0eBubUQXDLa32sau2+92y4mj4CRMBYVVj0xsUhmctwYAesT3hjgftnTFqVF+ttvv/nkv//+uw9bIG8EjIRR6BcSlgYGzTBGoZhRhLDm6CgwtxZCnxAGslDwzZs3LQltnLAFnKQvGQmnVx/z1BBit9tNL4pJMAUCRsIpUC+WiVOUgxbp+/fv/RVb1OuhyD5gJJxexdocRY6wW2gknF4xY0lgJBwL6dZysIQl72hrcruYFQJGwijUiQ1kfMKGJaJQxuhCGAlHh7xSINzDErJ+4tOnT/6iNUc9FNkHbJxwehXTJ/QrmLw01XFCG6Lw4GQWMEs4vUKxhN+/f59eDpNgIgSMhBMBXyzWeoNFPOZ1ZkuZYtG3brjGaOHnz59jkcnkGAUB6xOOAnNXITp3FPeMDhUyhc0m0HRhls91s4TT61IH69nYggN/DD5S9cFML5lJMAoCRsJRYO5RyGZz3I1bN8YPZ8/0uNuSJIyAOWamV55O4KZFyqajSPPXX3/xS9N0eslMglEQsD7hKDB3FYIzJvw8Ex1C+wRaF2b5XDcSxqJL2p9fv35FGvY7NDMYi1ZGkcNIOArMXYV4BvqE1WlrNmPGg5NZwPqE0ysUBtIhLMlRJWEpgZ1mg4B5R6dXpX4Qxg9RMErBMb1YJsFYCJglHAvp5nLUO+qHKJoT2pU8ETASTq9X3DD4QmmR2vYW0ytjCgnMMTMF6sUybSlTEY/ZnZklnF7ltpRpeh1MKoGRcFL4T4XbUqYTEnP837yjc9S61TkqBIyEUanDhJkjAkbCOWrd6hwVAuYdjUodJswcETBLOEetW52jQsBIGJU6TJg5ImAknKPWrc5RIWAkjEodJswcETASzlHrVueoEDASRqWONmFY1KvretsS2bUEETASJqg0EzkvBIyEeenTapMgAkbCBJVmIueFgJEwL31abRJEwEiYoNJM5LwQMBLmpU+rTYIIGAkTVJqJnBcCRsK89Gm1SRABI2GCSjOR80LASJiXPq02CSJgi3oTVJqJnBcCZgnz0qfVJkEEjIQJKs1EzgsBI2Fe+rTaJIiAkTBBpZnIeSFgJMxLn1abBBEwEiajNFvUm4yqBgpqJBwImCU3BK6NgJHw2ohafobAQASMhAMBs+SGwLURMBJeG1HLzxAYiICRcCBgltwQuDYCRsJrI2r5GQIDETASDgTMkhsC10bAPpd9bUQtv6sicLe4W0qGy/VizX+rxYrAcuHirlrQhJkZCScE34ruRuB58QzxDosDf6XUUBFC7ha7Unxyp9YcTU5lsxN4v9hvFptqtaHlw+KhGp9cjC3qTU5lwwQ+YEJozC2Tb7/Bt+1iW6o8ZrCWn6VkkZ8aCSNX0EXibbfb1WpFFvv9frdLtdkG954WD7xLeJGETVLol0FbVBT8bEemCHz//h0DqJUjsNvt06ro/nm/fF4unnlGj3/hKeG0qtMirfUJLzI1Md/85cuX9+/fq4QEsIUxSxvKhulbLe7UH6PxGD08NGFzlI5ieEvSYfOOJq2+NuGf3KEp/vnnn7akcVzD0XK/uA+9oPg/IZ7v9Xni+UAcgl8qhZHwUgRjvh8D+OHDB5UQHuKkub+/55fWKb3EeCTfLh6eFjtPP/p+68UG+pXGA58WT8hMP7AUH09FXiaJkfBluE1wl36md7OpcdbXSrNer//77z+9RIBTTKNy7+7u7sePH7///nvtjaNFdpq+qiTQzxvG6tVUY1r6i3YpKgRwb3L0FwnHDA+lpifAqb/XO2x8zMiB3fNueXK34HchvHne4IlpFyMnZ0xYU7OEqb49O+XG0EFahiiwgQS83cOi/v3335233yJBnelj7K/vWF9mXUGPsI0TeihiDwxtjtbW5+Hh8NtvvyCk9gxr09wikqF2+nK+10cRNCwfF4+Z9e5eBp1ZwpfhluRd0Jjhe9qiSL/dPo4ziwb/ig61K2Swbr3Y7uqmoSWJ6TWENhJeA8VE8sCp09+vc2GdzPT1B9BI2B8rS9kLgYrpk/GGTOaX9QJgcCIj4WDI7IZaBOqcLtbrq4WqHGkkLCNi50MRMNM3FLFSeiNhCZA0TnWB0q9fv/7995VKjM/z1SsJq99lhGrUmj4ImeFg+o3RtCGKGwN8vezxbf78+ZP8mP7y5s2b169fM7sL7vkS/v33X03w+vW79fqGbHSzzLZ+VZHOMrNen1fE0ICRcChiU6ZnrhnmrtPWkQxCIijD9J2J+9fHTF9/rAalNBIOgiulxErFq/DQjTecTR8o0Oak5WlD7dd5IMI5bBbOD4FPnz6Fs0YHVVCX1RYneS6Z9jkokwwSgyENCo4+C6OZIUjKaq2ZOs8gLZfIrXT15SvrtTCyLuVop7EhgKaGqslNsC6vau+cYB1bxa8ij05vgDxq9NrfaECtyapFa7zmQ55hAvOOXqdBEXMutEi/fv2KhP5JapG2Mt5QWFbbcmPql3A4g9K7d+8gEmu+/FJM/GHgxluMabds2fPt2zdqqr++ym/fvmU6LnPl1Wvt432ArgFhbCDLO0lGnp6ukiZkZEuYFwCicHgSE0OmCMehgfBqS1Z2aXwE0BFabynXTB/Ps3JGG42ES4gpbfjladeU/pcYsOX5p83BL/ElqPUWtaJhWJOVU5du1lNUSL7KMQLKQ5+Xl17T1OZgkZcjgPo5XpwP96LH6u0s5Cv2+mRpXzVZ9jH6GOuzrWGlllbcU6AThxeQsNdGT+SLEI+Pj6uVbPyIsea3eiCfylq9ZDGTI0CjNFQcDk92UmKTeQI64oerkwV7+8XznEf8GICtaopGJm1IZQFXP3/+zNYE4UFM9a7+MX37hLo3SUu+ahhbEtilaRHgGYKEPE+75a64tsgmWLdppsRAktIDLD3txLRlsVgwfWKx+MjgLV1H3XPEr7Hmxl4kpB8pytvtMNa8ANrLs6txIsBQ+26zw+/ixcP02Swzj0ZTAPOjlzCGBFiQCQtCCjXdSLw6YGhCMjaxBevtlqaienrCu3qRUG9gStSFZjcs2MKjIVA7y4xHwobaO1WA7eEgmf4S0ImBnTdqAhJzI1N8OaVLjnNVGQgtCzl0djQ1gXY3+dUAkSXHTNiL7ZmnJRuEgLhlhjhmanewnuFQ+yCQJ0ls09YKr6SYT3iJIh5toU4hS6ZP7rJZZp2oTZdgQHN0OiGt5F4I6ARraTqdkqfU66PHRbepxyvmVLl8/u81RJFPdTOtiY43nD6mKV8vwvS58Yb6L/vFCINzXCyaJ53EKPOVZDISXgnIibLBv8JYH7+YQUTA9DHKp2N9ifldsIHMNWGLfjWJE+E5SbFGwklgv7TQcKhd84JyiZm+CgYH7zOk98tIGLZxHoc5ZhLTM0avMtTO1P1ub00a9YR4zv90lBbbOIOOopEwjYfz4eB2sF56n8tieVhu7xcb9rG47uGGpAdnyXS3hsmMgZ9ocK6p3kDT+rSmqU8V7my2Zx+YpkrDJN39boltWO5XhxMDN9vN6ulpc3aCTiWdlduAwHJ5blo3JNFoHXW/Y159azK7OA0CTw/yMj0SbcOJ6yCxf/zDueW52WxZ+nZl+WLjNlZliHE+XL1p0ITvaZlv0/X+8UbC/liNkvIg3Au7RZSqZhDXyyN2sdhpkqvLhXg0jiu/RxHyRoWoa9Rnvtsd5jFsaCT0Op84UDB9ThbxSizcpOG9dAUZe2A/eZWymph4nlhxKCbLRhmcUDu82bCIXd4u8ziMhFPruc70ScceAjqDuNrjgjlgBrcP0iJdh8bB3UuDNGxCCnW3JJu6XkPLVzOovanZ0E9BMhIOfViulr5qzY78WR+WLJ9xxGJ7k+3JDC5k6miRhF6WBibThUzl0DH6mbQ/S0oxEpYAuf1pO2EwCCcG0r5c7Z6YCqO9wSdnGAuWsCJsI7GTM4yVqmUcYTNmxlMuPpV75neuzn4XTB9umP2zfDVTjiIDH3YrnYzGAH1PKWmFPrqJM75Bh0Gldco+FuJePY8y9szPko2BgJHw9igfHPfuhHu+80bPjvFtCHPuvGmnSFPgGGTtIB1D52fx/pi+suIvhYrP4qrxbKR0+M9bAGtpxyAEnh4O96sVW4N03vX182dSVpNxL/H6txPvWeEYtpSJXNgvaMvjYUcPBGqHE2q9JjIe73VzdM2jc9H61lGxR2k1STCwovCgAUymUo5bM5RQj7GmbmNFwR9WxEtpjMi2+mvpL3z8+LFWLjac9GvzSVBi4TASakalLGpLnXNktWMGGhilpof+zMDAN3i/kK1NUPpgM1iFHn8pbITNO5lbpi90WM/f0RVkPUa3hdJqu925HWW8pcFq6VpqDypWkT1c/SkBtiBcb5bYp5BmYQLCus9d08SYRhLyAlCBtttHStWSwqzhvbSY3Kd/1DYi32533BVn+/jIB4Gk+FMywmQU5pBbODA4vmqdT3ktA93C3EvNoJfhGFAqchLIWTCMvFxb3/TlDDM6590kZHt4YOMCCEOYbZ3wgRHWrQw8FeGCDysAvF7XrrUiu48ULZ5HSPkJUYmRDWZ8J8GlaOwTbh2z5ZXgdqcpsR8x2TpKy0AmTnnBqtXmForkdq76ZBqpQuhdOf1i+qoeF+n1PRd7fZU66xZcEh3YQM5OZnB5BTNYKRSmYRiRjVeofxhQoPUYmcmJOcHqgJnOqcZslDpfnGLQwj9NQMp2x7XqAWrorm2hWupJKKRy24BTAEd4g4Ypj/2c4TTsIgaJ/RxGynB7PYvR87PDNTI3S4hJcY5HXkfaxqPKwj3ncWlqfCqA/AoDHc4lBnozuC73Hfyt1wl4Vyoy66GGcbauVH2Y28GFo6u7u/Cv6mip5iAsgi/uw0xcpc0Ypqlvjp7Io8tkahbLSG+16AWiWbzcLcUGOgvJS0XfIrrhrEZu9sw4rqF0KFAS4WqvD5PC66iTeMfaFYciaMSHtT6ZQfGehPG3Cmszle5iMGWclwN/nW3pU3Xc//NoytIv8+8srb5uS9+iHddN43XNx5PrU9WT8LQZuPqDaubpa3cRcuMyOvqO8PnoyuinJ2gPG3lDQDkx7uvFz69f//nnH9fUll5svSzxxwa9KS8sKpHXTv86lRjo3lk+t8AMFphJgj6tnSCfwUEMo4yXBHXs2WOkEUQlaN/O4eDp1R5gZ2VpTkIEIcV6cdhKZw0jpP3JEgXqm6N8IIoyyEJJ3Fie8O3oiZHuHw1RcS5h1cV4ShMUHm5X+GfdNuCSzWgLTRplrl44jePRr+N9xR82wY0OnJPW9vowYDx5Yv1exkBeVWThu2WutLHN4LmKp9DwHqMOdYKeHSECNCcxRVgpPJRQiUswkBaimK7i0ThtzftUuI288BFh1mgKazvTN0eJ16xpfDJS6cdJND1lwUNlv4R3u1u/zou1G3DGM+T7de23DTZ9PrvQBsLAUrNGkh2YUcN/zN8eqS3qZWsKBIbRJ6kiQDeSQ+LL9tvfZIFGBBpIePpgIu9pZSMbbL/78KExmywu8OCro6S2Nn07SLU3YyzJWlueRUdomPx+IfPUMKuPi+jadmGPUWUOAfGvMN74ahjDelm4HYEGEtKYdB9+UTNIFuKqKTac2vNN9GotD6n3hatmzwzE2DUiGZ8ZrGqxwTD6OQDuURnSPq8WMb+YRhLSOOPrwXzGCSeNdBHzZmDds6UPw+VNrOahiMLjFrMZLAjqTqqG0aeRd1a51+MvWqAGgWYS1iTOMKrlYaK2lz9PPRnYpzdIvwCR4upUN7y8Lsctw0etuUr13tHm9Llc4elpGGcP3SUXvdF1VYT2MukHNrZCBdKjU5Ttpx9qRmXjBR1Xat02FLi4Zjvi/wJl1Y8TviCjVG6pmj5e2zxJVXeC8yoPqRaso28E2cIeEhnojiltOfHQyhSK9XLLgKoEkal44I6mW16d8VRMNfYZYKqzqbZg3j/8NcFbe8s8I2dDwrqGU9XVzkMAgzi4VKVlzSPSRDyfFBvYxWa/blCGJd5JV/y1EPLEQ9c5f/36dWwMrDqxEFnHgZlMxbtIGwG8YISounhq0KwGj2Hugfz7hP1Nn+qadtQAZwwkhGMl0xc+NPXjgWEKRgZllO08Nng46MqXcyJmP7ixImIi6ROCKjTjgG9CvNMb4yyzCw0Fv3T7TE7zJWGT6esaTWbI6yVdQWWjvvyDZ6e9K0hCFvrRaiPAp5SC+2qCMTpmasSsi2rShRlGh1aGjhmaSRCJN7RnBM0kzNVxilndQxLGvYSB3E8ZxRntkieR/LUdB2UgnxNsS5X6tdapcOhr5kdGJDxNAYV7fgIaDUtaTfCqVwfvgmfhPBwfsq7Fa0Hnc/Ggk9Qo1gdwwPB3gSBR34oW0AUaQS96UFf0NXNXag4k1MEG7JB/eiHC2fS1m6JrPLRnBjLeF6ybbvkugttuomwCWPSMd5S/XFc/H8FuNYx0I+d2JExCtCXNTreLmVebmL6u9ew+8VUChdXxvOR5AagBJBBaxVNhGMD7xZ22Qk9x8r8u9GSCrs7R1R5gmCC/cK1hBLy5GcYESVg3zl4wfaM9rThjeGS06xlMyz4awLq2qBrAanMTRyOLwvzKbgK6+GW0qkxZ0OwNY0re0Vp/N/7xaZbPwMBgq+zSYODy7q7kF8UAwsAq/fTpxzHztJIBSuWhDlHkthtIb6JXRyBl0ChfV2oKlrDO9HmPSxQMrBo95Cu2RfFHsGsTZGNoXkfnq88kDJS9CFh1eVr7jJOG/mFpS5LqjZnFoFP6FMDkIRTnjdu5OEtXatQzZuIyff5Jb7WBmqpkGIkM9/BlwYQmY4CeiV8ahngYQD0hoDyURdl6eX6/9BjFpx2MMeJ4U28q5LxwcVlUcEZpCSM0fV5pIQOJbJkr42+pCUizFK8tc7nw3kg2iyf2C5LdENxBoHP7IE2Z/29djxGc1DDm4UqNi4RHh2fTOPvtBxvan2mGIsIPWUpiOEmz6USe9tv1Kp1DpZraRj6+q/Fs/oMzhsYnf24fkKlr26cyI6Y5ulLdBza0WFCnH5CBKzUOx0zQ5PBqja0vXhgMdEMRZ9co6ySgYr/jtHhXvn2td/B57KfFzp+WsoGT7FhX2p+rlGaGp41dlQT9NxNbwshNn3+4zwwMVgYK8XhVcGAheSf3sIfODIohDL92RqO0cZ9fl+fPn1+5hZHDOQweCp49jtoxRu+/SauZOpklTMgNfbZ4wWCgf07OV3vYw6oZ9Pl0BhKewN1Zt8sTMGnx+HXjc17SmOrbQDnfNX5oMkuoQ9xUuDDOHls/iC4fJs4Px+uEmKKWCvYwnDtXTMZZrRmspLKIFyGgn2QMZqWSixhGtxfji3Ic76bJSChDZmPNrn4xnDIcrwzEyolTvP4487DkOy0mPy3evc1nXoplzfTs5Eqte1vGC8lk44SxtxNCOvVoZ8JDcZy6nqEEKreYGRyVBEnt+DaZJRxVJUMLG8hAzZ4dtc9T1dxghrhzTgdz1ggyKviyr52R1Wa///nz5yk/+z8fBCZzzMQLIQzElOnRY3OKakXO3Uiu0eXlexwbFs8LCZm85kbpqzc1xCAM8wH8UGTFwDbcZtEpIWCWsKAtDE4HAxkz6BqKoGl6Nokk3m6fDuKkc5Nj+rqeVBLfxBUpl8vPb94UxLWTLBCYrE8YIXrSeqRTx1E3FCHRXFUjCc3aR+d1ONE1a2mSHpZubHC1WB7u1DYelzv5GcrkrkYPl0J1KpyThwml7MKW+sFkdLcx1PllJDE3/lpetdB2GDW9fhLwvO1d+z16VTbpYsrruXZ9bjJLeETpzEDoEKyOP4OITXt6ko4fXt2nJ0nfeTgq7vbCwOVhuVET6mwjJk7++MqV/1O/DtlqMrlHNgjAqJ7tameJIyZoWd7BkCZXa2XhU3nhUkmWiTBXr3ZHD11BUpvJ0MhSoe23uylKIiTf+dPvcLan56qvLy9KbutMX0pgllAAOffiGmygpMH0nVYYSQCT1ePwM0Ufl48Hlt2TSdXQhfmobdxuxV6EdjJME0GYz+Axy9xN5ZG3vrDIWwDhlTS/iRQz4owDH8qsNSkSyaQ8NnQksauXtyQQgCK8nSxYM+I9CK5cEaC4WSv5NBUqIp1u9xKq+SIfDr6DREceRp1SuX0PilVAnmP+YX3lCdF6SNNG6sKZ02O1gj5zI2EvBgpeTiVC11NYAl2HHxtEFfwrNGK9xdNMuigXyY6jKizfXSbA7+t375Qt7sE9uI83y5PMVT4OS+udp1m+7bWlAVHzsXQeZTFTkvZeJ7cIB3ZLPnCrmYhhWT/y/VnNXzOB5PrRS8nZpac4AnoVu9ReaHi7uM2chLz3iNcPxZNVyEBsowpDcay0pnoqD5VyUh2Xv1AHXswItt8867c6VWayRXdiVx12KnC4YnvezVH0R6tJG5bhAIMDq+ZnvUZRQiR5v50OHrgSnU5X/NjgI18crB6wLvyrJog4Rr6CzgxYfmmiYwr2e54qeeZWKx44AhIWe7j2l8LHuqlmZAKRyBADRYBkxGibUALKvRPaPPNEkoa1lwQo8VREr0L1dmUgtwuBOZwNJ+xfeVAaeSDn/vmZAKdnefZ77ijW19XscOBruXzSk2z5JY1/QrQg8gkRmLUlLOxPoSYuxKYUDonHJU7hsHwe3B1OUaUGpB8bFDOY6aGmQxp1jgylx4v2AxYOLhIPSS7BQDuZwrRTLs3+j16F+tuRzWd+yvv8v1bw3inaV0EDUuu6SmkzVj8R734/Bg3bc84+NFdLqDZQX0hq3OrQ9DARoNmkLVKJ5PVPGwZoUSANJxw57g0apmeBkr7u6s1gmDTlsH4hA/vgUHnyj6nWSQyFM1OXVFE3GcCG0EaVDLs0NahQBOaQzN1RlVMriM0nzfv37xGGQ981tDnlW7pFs0YOSm/10OivJ3w1f2JmSUK1YJ6BrtlTi04hEt1DPDonsJE/TtU3Q4CeCZkUH46n0xSZLM2gPlV052gRaENOP+3MkwpoPKxqXrhEH4lLPOgFMHuc6N4C3EsTkdslsFqpXWq/e1ChkIvcJPOGppBUT1qqK9JIT9g1s1UebXMS4+vrBaPlDALcwq/0k1uP2c2YCYciZACgJwPrQNSsZPwAntG3DHLDDL5wikxdQRaXNwLz6hOGDLx88A0CL/EH6ICYjh+eHpZbmEFt8nmHwako+z95BGZEwj6DgUP1KZ7SufYGh2Jl6ZsQmEufUGygDkU0D8c3YTQ0/hZmcKgMlj4hBGZgCXHDYKw8A7t6yRcqbyZO0QtRsttDBPIn4XkwUG1gWPsbhM0M3gDUzLPMujkaDgb2mRBzsa7NDF4M4RwzyJeE4WAgDKy4T26hbTODt0A1+zwzbY6qDVTtBcN3N1WnmcGbwptx5jlawikYyCNiZjBjnty0armRkKGI4+g5bhiWw14wIWYQ7mYGB8FliUMEsiJhYUJM7er4sOpXDZsZvCqc88osn7mjt5gQ0/NZwAzaTNGeWFmyKgKZWMIJGQimZgarD5bF9EcgfRLihmERik6IGWUwsASu9QZLgNjpUASSH6I4T4iBgQ1LwoaCMii9NkRlA5l8l88PAsQSD0UgZUuoQxG6NleH44evHB2KVyk9ZlBjmj7xWUpvp4ZAFYFkLSEM9B+kG2s4vgqf9gb5wFT1ksUYAj0RSJOEEw3HlzD1vcHws7ulNFc8tUW9VwQzqqzSI2FhMJB1SaM3Qb3+zCnqobDAJQgk1ic8M9BNiJmQgWxnyGZqeGPy3kztkmfL7u2JQEqW8DwUcfvV8Z3wsbEvadzHBgfvI9aZuSWYFQKJkJBO4Iir4zufgJF7g53yWIKkEUiDhGdH6ESDgSUd69igc4qaGSxhY6eDEYi+TxjBYGAJVN3cnsjtQr/wUbpup4bAMATiJmE4GKjD8cNqd5PU2hu0scGbgDvLTCNujsYxGFh6KrxT1MxgCRk7fTECsVrCKBkIyoFT9MWY242GQAGBGEl4Xh2PqNNNSSvg5E7MDFYxsZjLEYiuOVoYjh93dXwnmtOaQfsKRaeCEk0QFwmjGo4vaVTNIJHWGywhY6cXIhBRczRmBoIy37Lg15yiFz5wdnsVgYj2mFny0VOOaIYiQrCYInPaReY5jLewIXA5AjE1R90m2aNtUvgC7MwMvgA0u6UTgYgsYaeslsAQyBKBiPqEWeJ7xUqxqFfX9V4xT8sqBgSMhDFowWSYNQJGwlmr3yofAwJGwhi0YDLMGgEj4azVb5WPAQEjYQxaMBlmjYCRcNbqt8rHgICRMAYtmAyzRsBIOGv1W+VjQMBIGIMWTIZZI2AknLX6rfIxIGBzR2PQgskwawTMEs5a/Vb5GBAwEsagBZNh1ggYCWetfqt8DAgYCWPQgskwawSMhLNWv1U+BgSMhDFooZcMtqi3F0wJJjISJqg0EzkvBIyEeenTapMgAkbCBJVmIueFgM2YyUufVpsEETBLmKDSTOS8EDAS5qVPq02CCBgJE1SaiZwXAkbCvPRptUkQASNhgkozkfNCwEiYlz6tNgkiYCRMUGkmcl4IGAnz0qfVJkEEjIQJKs1EzgsBI2Fe+rTaJIjA/wMeRdaNMMBVUwAAAABJRU5ErkJggg==" width="300" height="240" class="img_ev3q"></p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="schlicks-approximation">Schlick's Approximation<a href="https://prabhavdogra.github.io/prabhav.tech/blog/ray_tracer#schlicks-approximation" class="hash-link" aria-label="Direct link to Schlick's Approximation" title="Direct link to Schlick's Approximation">​</a></h3>
+<p>Schlick's Approximation provides an efficient way to estimate <strong>reflectance</strong> at the interface of two materials based on the <strong>angle of incidence</strong>.</p>
+<p><img decoding="async" loading="lazy" alt="schlicks" src="https://prabhavdogra.github.io/prabhav.tech/assets/images/image-12-1ee6d285989f7b6653edf41265cc2396.png" width="1600" height="637" class="img_ev3q"></p>
+<div class="codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">R₀ = ((n₁ - n₂) / (n₁ + n₂))²</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<p>This approximation avoids expensive computations while providing visually accurate reflections.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="final-render">Final Render<a href="https://prabhavdogra.github.io/prabhav.tech/blog/ray_tracer#final-render" class="hash-link" aria-label="Direct link to Final Render" title="Direct link to Final Render">​</a></h3>
+<p><img decoding="async" loading="lazy" alt="Final" src="https://prabhavdogra.github.io/prabhav.tech/assets/images/image-2-c18e085804d79caa3e3dc9aca26e4f9c.png" width="1200" height="675" class="img_ev3q"></p>]]></content:encoded>
+            <category>C++</category>
+        </item>
+    </channel>
+</rss>

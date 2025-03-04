@@ -1,9 +1,0 @@
-c++:
-  label: C++
-  permalink: /c++
-  description: C++ Projects
-
-go:
-  label: Go
-  permalink: /go
-  description: Golang exploration projects
