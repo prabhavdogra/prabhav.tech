@@ -35,7 +35,7 @@ function HomepageHeader() {
         <div className={styles.heroSubtitleContainer}>
           <p className={styles.heroSubtitle}>
           I'm <span className={styles.heroSubtitleSpan}>Prabhav</span>. 
-          I get a dopamine rush from learning new things—whether it's diving into new technology, optimizing systems, or tackling real-world challenges. 
+          I get a dopamine rush from learning new things—whether it's diving into new technology, optimizing systems, or tackling real-world challenges.
           Always exploring, always evolving—because the thrill of problem-solving never gets old.
           </p>
         </div>
