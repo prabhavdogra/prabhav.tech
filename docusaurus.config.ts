@@ -5,8 +5,8 @@ import type * as Preset from '@docusaurus/preset-classic';
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: 'Prabhav',
-  tagline: 'Dinosaurs are cool',
+  title: 'Hello!',
+  tagline: "I'm Prabhav. I get a dopamine rush from learning new things—whether it's diving into new technology, optimizing systems, or tackling real-world challenges. Always exploring, always evolving—because the thrill of problem-solving never gets old.",
   favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
@@ -79,12 +79,12 @@ const config: Config = {
           label: 'GitHub',
           position: 'right',
         },
-        {
-          type: 'docSidebar',
-          sidebarId: 'tutorialSidebar',
-          position: 'left',
-          label: 'Projects',
-        },
+        // {
+        //   type: 'docSidebar',
+        //   sidebarId: 'tutorialSidebar',
+        //   position: 'left',
+        //   label: 'Projects',
+        // },
         {to: '/blog', label: 'Blogs', position: 'left'},
       ],
     },
