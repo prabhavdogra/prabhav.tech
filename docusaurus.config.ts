@@ -17,7 +17,7 @@ const config: Config = {
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'dograprabhav', // Usually your GitHub org/user name.
+  organizationName: 'prabhavdogra', // Usually your GitHub org/user name.
   projectName: 'prabhav.tech', // Usually your repo name.
 
   onBrokenLinks: 'throw',
@@ -40,7 +40,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/dograprabhav/prabhav.tech/tree/master',
+            'https://github.com/prabhavdogra/prabhav.tech/tree/master',
         },
         blog: {
           showReadingTime: true,
@@ -51,7 +51,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/dograprabhav/prabhav.tech/tree/master',
+            'https://github.com/prabhavdogra/prabhav.tech/tree/master',
           // Useful options to enforce blogging best practices
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
@@ -75,7 +75,7 @@ const config: Config = {
       },
       items: [
         {
-          href: 'https://github.com/dograprabhav',
+          href: 'https://github.com/prabhavdogra',
           label: 'GitHub',
           position: 'right',
         },

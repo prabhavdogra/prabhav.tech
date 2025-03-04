@@ -7,7 +7,7 @@ tags: [c++]
 
 This blog is just a quick summary of the book [Ray Tracing in One Weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.htmlRay)
 
-Github Source Code: [dograprabhav/ray_tracer](https://github.com/dograprabhav/ray_tracer)
+Github Source Code: [prabhavdogra/ray_tracer](https://github.com/prabhavdogra/ray_tracer)
 
 ## What're we gonna make?
 
