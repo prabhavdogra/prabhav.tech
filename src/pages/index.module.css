@@ -84,8 +84,8 @@
 
 .thugLifeGlasses {
   position: absolute;
-  top: 28.5%;  /*Control position*/
-  left: 50.3%; /*Control position*/
+  top: 29.8%;  /*Control position*/
+  left: 50.2%; /*Control position*/
   width: 50px; /*Control size*/
   transform: translate(-50%, -100%) scale(1.5);
   opacity: 0; /*For aligning make this 1*/

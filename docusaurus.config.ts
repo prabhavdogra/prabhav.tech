@@ -96,7 +96,7 @@ const config: Config = {
           items: [
             {
               label: 'Projects',
-              to: '/docs/intro',
+              to: 'https://github.com/prabhavdogra?tab=repositories',
             },
           ],
         },
