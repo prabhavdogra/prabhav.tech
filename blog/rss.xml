@@ -125,7 +125,7 @@ The Go assembler was heavily inspired by the <a href="https://9p.io/sys/doc/comp
             <pubDate>Thu, 27 Feb 2025 00:00:00 GMT</pubDate>
             <description><![CDATA[This blog is just a quick summary of the book Ray Tracing in One Weekend]]></description>
             <content:encoded><![CDATA[<p>This blog is just a quick summary of the book <a href="https://raytracing.github.io/books/RayTracingInOneWeekend.htmlRay" target="_blank" rel="noopener noreferrer">Ray Tracing in One Weekend</a></p>
-<p>Github Source Code: <a href="https://github.com/prabhavdogra/ray_tracer" target="_blank" rel="noopener noreferrer">prabhavdogra/ray_tracer</a></p>
+<p>Github Source Code: <a href="https://github.com/dograprabhav/ray_tracer" target="_blank" rel="noopener noreferrer">dograprabhav/ray_tracer</a></p>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="whatre-we-gonna-make">What're we gonna make?<a href="https://prabhavdogra.github.io/prabhav.tech/blog/ray_tracer#whatre-we-gonna-make" class="hash-link" aria-label="Direct link to What're we gonna make?" title="Direct link to What're we gonna make?">​</a></h2>
 <p><img decoding="async" loading="lazy" alt="Final" src="https://prabhavdogra.github.io/prabhav.tech/assets/images/image-2-c18e085804d79caa3e3dc9aca26e4f9c.png" width="1200" height="675" class="img_ev3q"></p>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="milestone-1">Milestone 1:<a href="https://prabhavdogra.github.io/prabhav.tech/blog/ray_tracer#milestone-1" class="hash-link" aria-label="Direct link to Milestone 1:" title="Direct link to Milestone 1:">​</a></h2>
