@@ -2,11 +2,373 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://prabhavdogra.github.io/prabhav.tech/blog</id>
     <title>Hello! Blog</title>
-    <updated>2025-03-01T00:00:00.000Z</updated>
+    <updated>2025-03-12T00:00:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://prabhavdogra.github.io/prabhav.tech/blog"/>
     <subtitle>Hello! Blog</subtitle>
     <icon>https://prabhavdogra.github.io/prabhav.tech/img/favicon.ico</icon>
+    <entry>
+        <title type="html"><![CDATA[What does memory mean actually?]]></title>
+        <id>https://prabhavdogra.github.io/prabhav.tech/blog/memory_hierarchy</id>
+        <link href="https://prabhavdogra.github.io/prabhav.tech/blog/memory_hierarchy"/>
+        <updated>2025-03-12T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[Introduction]]></summary>
+        <content type="html"><![CDATA[<h3 class="anchor anchorWithStickyNavbar_LWe7" id="introduction">Introduction<a href="https://prabhavdogra.github.io/prabhav.tech/blog/memory_hierarchy#introduction" class="hash-link" aria-label="Direct link to Introduction" title="Direct link to Introduction">​</a></h3>
+<p>While exploring how Go manages memory, I stumbled upon an intricate hierarchy that determines how fast data moves between the CPU and RAM. Go’s runtime optimizations, like garbage collection and stack allocation, made me curious about what happens under the hood. This led me to registers, caches (L1, L2, L3), and RAM—each playing a crucial role in balancing speed and storage.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="prerequisites-whats-a-cpu-cycle">Prerequisites: What's a CPU Cycle?<a href="https://prabhavdogra.github.io/prabhav.tech/blog/memory_hierarchy#prerequisites-whats-a-cpu-cycle" class="hash-link" aria-label="Direct link to Prerequisites: What's a CPU Cycle?" title="Direct link to Prerequisites: What's a CPU Cycle?">​</a></h2>
+<p><strong>CPU Cycle:</strong></p>
+<ul>
+<li>It's the smallest unit of processing that a CPU can do.</li>
+<li>Each cycle allows the CPU to execute instructions like fetching data, performing arithmetic, or storing results.</li>
+<li>For example: the method <code>atomic.CompareAndSwap</code> in go is executed as follows:<!-- -->
+<ul>
+<li>It reads a value from memory.</li>
+<li>It compares it with an expected value.</li>
+<li>If they match, it writes a new value.</li>
+<li>This requires at least three steps (read, compare, write), which take multiple cycles.</li>
+</ul>
+</li>
+<li>A single 1GHz CPU can complete one CPU cycle in 1 nanosecond.</li>
+<li>Similarly, a 3GHz CPU can complete one CPU cycle in 0.33 nanoseconds.</li>
+<li>Not Every Operation Takes 1 Cycle<!-- -->
+<ul>
+<li>Simple instructions like integer addition (a + b) may take 1 cycle.</li>
+<li>More complex operations (e.g., division, memory access) can take multiple cycles.</li>
+</ul>
+</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="understanding-computer-memory-hierarchy">Understanding Computer Memory Hierarchy<a href="https://prabhavdogra.github.io/prabhav.tech/blog/memory_hierarchy#understanding-computer-memory-hierarchy" class="hash-link" aria-label="Direct link to Understanding Computer Memory Hierarchy" title="Direct link to Understanding Computer Memory Hierarchy">​</a></h2>
+<ol>
+<li><strong>Registers (Fastest, Smallest)</strong>
+<ul>
+<li>Located inside the CPU, closest to the execution units.</li>
+<li>Stores data for immediate operations (e.g., arithmetic calculations).</li>
+<li>Extremely small (few bytes) but operates at CPU clock speed.</li>
+<li>Access time: 1 CPU cycle (fastest).</li>
+</ul>
+</li>
+<li><strong>L1 Cache (Level 1)</strong>
+<ul>
+<li>Smallest and fastest cache (typically 32KB to 128KB per core).</li>
+<li>Directly integrated into the CPU core.</li>
+<li>Stores frequently used instructions and data for ultra*fast access.</li>
+<li>Access time: 2-4 CPU cycles.</li>
+</ul>
+</li>
+<li><strong>L2 Cache (Level 2)</strong>
+<ul>
+<li>Larger than L1 (256KB to a few MB per core).</li>
+<li>Slightly slower than L1 but still much faster than RAM.</li>
+<li>Used to store recently accessed data that might be needed again soon.</li>
+<li>Access time: 10-20 CPU cycles.</li>
+</ul>
+</li>
+<li><strong>L3 Cache (Level 3)</strong>
+<ul>
+<li>Shared among multiple CPU cores, ranging from a few MB to tens of MB.</li>
+<li>Acts as a buffer between L2 and RAM, reducing latency for core-to-core communication.</li>
+<li>Access time: 30-60 CPU cycles.</li>
+</ul>
+</li>
+<li><strong>RAM (Random Access Memory)</strong>
+<ul>
+<li>Main working memory for the system (GBs in size).</li>
+<li>Much slower than CPU caches but holds more data.</li>
+<li>Stores active processes and data that aren’t frequently used by the CPU.</li>
+<li>Access time: 100+ CPU cycles.</li>
+</ul>
+</li>
+</ol>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="registers-the-fastest-storage">Registers: The Fastest Storage<a href="https://prabhavdogra.github.io/prabhav.tech/blog/memory_hierarchy#registers-the-fastest-storage" class="hash-link" aria-label="Direct link to Registers: The Fastest Storage" title="Direct link to Registers: The Fastest Storage">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="what-are-registers">What Are Registers?<a href="https://prabhavdogra.github.io/prabhav.tech/blog/memory_hierarchy#what-are-registers" class="hash-link" aria-label="Direct link to What Are Registers?" title="Direct link to What Are Registers?">​</a></h3>
+<p>Registers are ultra-fast, small storage units embedded directly inside a computer’s CPU (Central Processing Unit). They are temporary holding areas for data, instructions, or memory addresses that the CPU needs to access immediately during computations. Registers are the fastest type of memory in a computer, designed to minimize delays in processing.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="how-registers-work">How Registers Work?<a href="https://prabhavdogra.github.io/prabhav.tech/blog/memory_hierarchy#how-registers-work" class="hash-link" aria-label="Direct link to How Registers Work?" title="Direct link to How Registers Work?">​</a></h3>
+<ul>
+<li><strong>Fetching Data:</strong> When the CPU needs to perform an operation (e.g., 5 + 3), it first copies the values 5 and 3 from RAM into two registers.</li>
+<li><strong>Processing:</strong> The CPU’s arithmetic logic unit (ALU) performs the addition directly using the values stored in the registers.</li>
+<li><strong>Storing Results:</strong> The result (8) is placed into another register, which can either be used for further operations or written back to RAM.</li>
+</ul>
+<ol>
+<li>
+<p><strong>Basic Structure: Flip-Flops</strong></p>
+<ul>
+<li><strong>Core Component:</strong> Registers are built using D-type flip-flops, which store one bit each. A 32-bit register, for example, contains 32 flip-flops.</li>
+<li><strong>Function:</strong> Each flip-flop has:<!-- -->
+<ul>
+<li><strong>Data Input (D):</strong> Receives the bit to store.</li>
+<li><strong>Clock Input (CLK):</strong> Synchronizes when the input is captured. This means that data is not stored immediately when placed on the input but is instead captured only when the clock signal triggers.</li>
+<li><strong>Output (Q):</strong> Provides the stored bit.</li>
+<li><strong>Write Enable (WE):</strong> Determines if the flip-flop updates its value on the next CPU cycle</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Data Storage and Clock Synchronization</strong></p>
+<p><strong>Writing Data:</strong></p>
+<ul>
+<li>When the CPU writes to a register:<!-- -->
+<ul>
+<li>The write enable signal for the register is activated.</li>
+<li>Data is placed on the <strong>input bus</strong>.  The input bus is a set of electrical connections that carry data to the register.</li>
+<li>In the <strong>next CPU Cycle</strong>, the flip-flops capture the input values.</li>
+</ul>
+</li>
+</ul>
+<p><strong>Reading Data:</strong></p>
+<ol>
+<li><strong>Stored Data in Flip-Flops</strong>
+<ul>
+<li>A register consists of multiple flip-flops, each storing a single bit. Once a value is stored in a flip-flop, it remains available at its output until changed by a new write operation. However, this stored value is not automatically placed on the CPU’s internal bus—something must send the data when the data is read.</li>
+<li>Each flip-flop's output is connected to a tri-state buffer, which controls whether the stored bit is driven onto the bus connecting CPU and register (for reading the bit).</li>
+</ul>
+</li>
+<li><strong>Role of the Tri-State Buffer</strong>
+<ul>
+<li>Tri-State Buffer ensures conflict-free (kindof like mutex) data access, enabling the CPU to perform billions of operations per second reliably.</li>
+<li>A tri-state buffer is a special circuit that can either:<!-- -->
+<ul>
+<li><strong>Tri-State Buffer Enabled:</strong> Passes the stored data from the register to the bus connecting CPU and register.</li>
+<li><strong>Tri-State Buffer Disabled:</strong> Disconnects the register from bus connecting CPU and register.</li>
+</ul>
+</li>
+<li>This is necessary because multiple registers share the same internal bus, and only one should be active at a time to avoid conflicting reads and writes.</li>
+<li>The enable signal is synchronized with the CPU clock to ensure stable data transfer.</li>
+</ul>
+</li>
+</ol>
+</li>
+</ol>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="types-of-registers">Types of Registers<a href="https://prabhavdogra.github.io/prabhav.tech/blog/memory_hierarchy#types-of-registers" class="hash-link" aria-label="Direct link to Types of Registers" title="Direct link to Types of Registers">​</a></h3>
+<ul>
+<li><strong>General-Purpose Registers:</strong>
+<ul>
+<li>Used for temporary data storage and most calculations.</li>
+</ul>
+</li>
+<li><strong>Special-Purpose Registers:</strong>
+<ul>
+<li><strong>Program Counter (PC):</strong> Holds the memory address of the next instruction to execute.</li>
+<li><strong>Instruction Register (IR):</strong> Stores the current instruction being decoded/executed.</li>
+<li><strong>Stack Pointer (SP)</strong>: Tracks the top of the stack in memory.</li>
+<li><strong>Status/Flag Register</strong>: Stores metadata about operations (e.g., whether a result was zero or caused an overflow).</li>
+</ul>
+</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="why-registers-are-essential">Why Registers Are Essential<a href="https://prabhavdogra.github.io/prabhav.tech/blog/memory_hierarchy#why-registers-are-essential" class="hash-link" aria-label="Direct link to Why Registers Are Essential" title="Direct link to Why Registers Are Essential">​</a></h3>
+<ul>
+<li><strong>Eliminate Bottlenecks:</strong> Without registers, the CPU would need to read/write data directly from RAM for every operation, which is too slow.</li>
+<li><strong>Enable Pipelining:</strong> Registers allow the CPU to work on multiple instructions simultaneously by holding intermediate states.</li>
+<li><strong>Direct Hardware Access:</strong> Registers interface directly with the CPU’s ALU and control unit, enabling rapid execution of machine-level instructions.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="cpu-cache-l1-l2-l3-cpu-caches">CPU Cache: L1, L2, L3 CPU caches<a href="https://prabhavdogra.github.io/prabhav.tech/blog/memory_hierarchy#cpu-cache-l1-l2-l3-cpu-caches" class="hash-link" aria-label="Direct link to CPU Cache: L1, L2, L3 CPU caches" title="Direct link to CPU Cache: L1, L2, L3 CPU caches">​</a></h2>
+<p>CPU Caches are small, ultra-fast memory layers between the CPU and main memory (RAM). They store frequently accessed data and instructions to reduce latency and improve performance. Modern CPUs use three levels of cache:</p>
+<p>There are two types of cached instructions:</p>
+<ul>
+<li><strong>Instruction Cache:</strong>
+<ul>
+<li><strong>What it stores:</strong>
+<ul>
+<li>Instructions are the actual binary code (machine code) of the program being executed by the CPU.</li>
+<li>Examples: <code>ADD</code>, <code>MOV</code>, <code>JUMP</code>, <code>LOAD</code>, or any operation the CPU performs.</li>
+</ul>
+</li>
+<li><strong>Purpose:</strong>
+<ul>
+<li>Allows the CPU to quickly fetch the next operation to execute.</li>
+<li>For example, when running a loop, the instruction cache holds the repeated code (<code>for</code>, <code>while</code> loops) so the CPU doesn’t have to fetch it repeatedly from slower memory.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><strong>Data Cache:</strong>
+<ul>
+<li><strong>What it stores:</strong>
+<ul>
+<li>Data refers to the values the CPU is actively working with.</li>
+<li>Examples: Variables (e.g., int x = 5), memory addresses, temporary results, or input/output values.</li>
+</ul>
+</li>
+<li><strong>Purpose:</strong>
+<ul>
+<li>Provides fast access to the operands (numbers, addresses) needed by instructions.</li>
+<li>For example, when calculating x + y, the data cache holds the values of x and y for the ADD instruction to use.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>Why Split Them?</strong></p>
+<ul>
+<li><strong>Parallel Access:</strong>
+<ul>
+<li>The CPU can fetch the next instruction (from the instruction cache) while simultaneously reading/writing data (from the data cache). This avoids bottlenecks.</li>
+<li><strong>Example:</strong> While executing an ADD instruction, the CPU can already fetch the next instruction (MOV or JUMP) from the instruction cache.</li>
+</ul>
+</li>
+<li><strong>Specialization:</strong>
+<ul>
+<li>Instruction caches are optimized for sequential access (program code is usually read in order).</li>
+<li>Data caches are optimized for random access (variables can be accessed in any order).</li>
+</ul>
+</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="l1-cache-level-1-cache">L1 Cache (Level 1 Cache)<a href="https://prabhavdogra.github.io/prabhav.tech/blog/memory_hierarchy#l1-cache-level-1-cache" class="hash-link" aria-label="Direct link to L1 Cache (Level 1 Cache)" title="Direct link to L1 Cache (Level 1 Cache)">​</a></h3>
+<ul>
+<li><strong>Role:</strong>
+<ul>
+<li>The fastest and smallest cache, directly integrated into the CPU core.</li>
+<li>Split into L1 Instruction Cache (stores executable code) and L1 Data Cache (stores data).</li>
+</ul>
+</li>
+<li><strong>Characteristics:</strong>
+<ul>
+<li><strong>Size:</strong> Typically 32–64 KB per core (e.g., 64 KB total: 32 KB data + 32 KB instructions).</li>
+<li><strong>Speed:</strong> 1–4 clock cycles access time (fastest).</li>
+<li><strong>Location:</strong> Embedded within each CPU core.</li>
+</ul>
+</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="l2-cache-level-2-cache">L2 Cache (Level 2 Cache)<a href="https://prabhavdogra.github.io/prabhav.tech/blog/memory_hierarchy#l2-cache-level-2-cache" class="hash-link" aria-label="Direct link to L2 Cache (Level 2 Cache)" title="Direct link to L2 Cache (Level 2 Cache)">​</a></h3>
+<ul>
+<li><strong>Role:</strong>
+<ul>
+<li>Acts as a middle layer between L1 and L3.</li>
+<li>Stores data/instructions not held in L1 but likely to be reused.</li>
+</ul>
+</li>
+<li><strong>Characteristics:</strong>
+<ul>
+<li><strong>Size:</strong> 256 KB–2 MB per core (varies by CPU design).</li>
+<li><strong>Speed</strong>: 10–20 clock cycles access time.</li>
+<li><strong>Location</strong>: May be shared between cores or dedicated per core (e.g., AMD Zen vs. Intel Core).</li>
+</ul>
+</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="l3-cache-level-3-cache">L3 Cache (Level 3 Cache)<a href="https://prabhavdogra.github.io/prabhav.tech/blog/memory_hierarchy#l3-cache-level-3-cache" class="hash-link" aria-label="Direct link to L3 Cache (Level 3 Cache)" title="Direct link to L3 Cache (Level 3 Cache)">​</a></h3>
+<ul>
+<li><strong>Role:</strong>
+<ul>
+<li>The largest and slowest CPU cache, shared across all cores.</li>
+<li>Reduces traffic to RAM by storing data shared between multiple cores.</li>
+</ul>
+</li>
+<li><strong>Characteristics</strong>:<!-- -->
+<ul>
+<li><strong>Size</strong>: 4–64 MB</li>
+<li><strong>Speed</strong>: 20–50 clock cycles access time.</li>
+<li><strong>Location</strong>: On the CPU die but outside individual cores.</li>
+</ul>
+</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="why-three-levels">Why Three Levels?<a href="https://prabhavdogra.github.io/prabhav.tech/blog/memory_hierarchy#why-three-levels" class="hash-link" aria-label="Direct link to Why Three Levels?" title="Direct link to Why Three Levels?">​</a></h3>
+<ul>
+<li><strong>Latency vs. Size Trade-off:</strong> L1 prioritizes speed for critical data, L2 balances speed and size, and L3 minimizes RAM access.</li>
+<li><strong>Efficiency:</strong> Reduces "cache misses" by filtering requests through layers (90% of data is often found in L1/L2).</li>
+<li><strong>Multicore Optimization:</strong> L3 enables shared data (e.g., game textures, OS tasks) to stay accessible to all cores.</li>
+</ul>
+<p><strong>Practical Example:</strong></p>
+<ul>
+<li>When running a game:<!-- -->
+<ul>
+<li>L1: Stores code for rendering a character (e.g., position calculations).</li>
+<li>L2: Caches textures used in the current scene.</li>
+<li>L3: Holds shared assets like audio files or global physics data.</li>
+</ul>
+</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="why-not-replace-l2-and-l3-with-l1">Why not replace L2 and L3 with L1?<a href="https://prabhavdogra.github.io/prabhav.tech/blog/memory_hierarchy#why-not-replace-l2-and-l3-with-l1" class="hash-link" aria-label="Direct link to Why not replace L2 and L3 with L1?" title="Direct link to Why not replace L2 and L3 with L1?">​</a></h3>
+<ul>
+<li><strong>Physical Limits:</strong>
+<ul>
+<li>L1 is fast but bulky/power-hungry. Scaling it to L2/L3 sizes would make CPUs impractical (cost, heat, latency).</li>
+</ul>
+</li>
+<li><strong>Hierarchy Efficiency</strong>:<!-- -->
+<ul>
+<li><strong>L1</strong>: Speed-optimized for critical data.</li>
+<li><strong>L2</strong>: Balances size/speed for common data.</li>
+<li><strong>L3</strong>: Shared, large storage to minimize RAM trips.</li>
+</ul>
+</li>
+<li><strong>Cache Miss Mitigation</strong>:<!-- -->
+<ul>
+<li>Without L2/L3, frequent RAM access (~100x slower) would cripple performance.</li>
+</ul>
+</li>
+<li><strong>Power/Heat</strong>:<!-- -->
+<ul>
+<li>Larger L1 would drain power and overheat CPUs.</li>
+</ul>
+</li>
+<li><strong>Multicore Sharing</strong>:<!-- -->
+<ul>
+<li>L3 allows cores to access shared data without duplicating it in L1/L2.</li>
+</ul>
+</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="ram-the-parts-of-the-memory-cell">RAM: The Parts of the Memory Cell<a href="https://prabhavdogra.github.io/prabhav.tech/blog/memory_hierarchy#ram-the-parts-of-the-memory-cell" class="hash-link" aria-label="Direct link to RAM: The Parts of the Memory Cell" title="Direct link to RAM: The Parts of the Memory Cell">​</a></h2>
+<p>Imagine a single memory cell in your computer’s RAM (the temporary memory your computer uses to do stuff). Think of it like a tiny light switch and a tiny battery working together to store a 0 or a 1 (the basic "yes/no" language computers use). Here’s how it works:</p>
+<ul>
+<li><strong>Capacitor:</strong> A tiny “battery” that can hold an electric charge.<!-- -->
+<ul>
+<li>Charged (has electricity) = 1</li>
+<li>Not charged (empty) = 0</li>
+</ul>
+</li>
+<li><strong>Transistor:</strong> A tiny “light switch” that controls access to the capacitor.<!-- -->
+<ul>
+<li>ON (switch closed) = Lets electricity flow.</li>
+<li>OFF (switch open) = Blocks electricity.</li>
+</ul>
+</li>
+<li><strong>Address Line:</strong> The wire that tells the transistor to turn ON/OFF.</li>
+<li><strong>Data Line:</strong> The wire that reads or writes the charge (0 or 1) to the capacitor.</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="how-it-works">How It Works<a href="https://prabhavdogra.github.io/prabhav.tech/blog/memory_hierarchy#how-it-works" class="hash-link" aria-label="Direct link to How It Works" title="Direct link to How It Works">​</a></h3>
+<ol>
+<li>Writing Data (Saving a 0 or 1)<!-- -->
+<ul>
+<li><strong>Step 1:</strong> The CPU (computer’s brain) says, “Hey, I need to save a 1 at this specific memory cell!”</li>
+<li><strong>Step 2:</strong> The Address Line sends electricity (like flipping the switch ON).</li>
+<li><strong>Step 3:</strong> The Data Line sends electricity to charge the capacitor (filling the tiny battery).
+<strong>Result:</strong> Capacitor is charged = 1 is stored.
+If the CPU wants to save a 0, the Data Line drains the capacitor instead.</li>
+</ul>
+</li>
+<li>Reading Data (Checking if it’s 0 or 1)<!-- -->
+<ul>
+<li><strong>Step 1:</strong> The CPU says, “What’s stored at this memory cell?”</li>
+<li><strong>Step 2:</strong> The Address Line sends electricity (switch ON).</li>
+<li><strong>Step 3:</strong> If the capacitor is charged (storing 1), electricity flows out through the Data Line.<!-- -->
+<ul>
+<li><strong>Result:</strong> The CPU detects this flow = 1.</li>
+</ul>
+</li>
+<li><strong>Step 4:</strong> If the capacitor is empty (storing 0), no electricity flows.<!-- -->
+<ul>
+<li><strong>Result:</strong> The CPU detects no flow = 0.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="refresh-cycle">Refresh Cycle<a href="https://prabhavdogra.github.io/prabhav.tech/blog/memory_hierarchy#refresh-cycle" class="hash-link" aria-label="Direct link to Refresh Cycle" title="Direct link to Refresh Cycle">​</a></h3>
+<ul>
+<li>Each DRAM cell consists of a <strong>capacitor (storing a 1 or 0 as charge)</strong> and an <strong>access transistor</strong>.</li>
+<li>When a cell is <strong>“charged” (1)</strong> or <strong>“discharged” (0)</strong>, that state is maintained only temporarily because the charge leaks away.</li>
+<li>The <strong>DRAM controller (or memory controller)</strong> periodically reads each memory cell and then rewrites (recharges) it to restore the original value. This <strong>refresh cycle</strong> typically occurs every 64–128 milliseconds for all cells.</li>
+<li>Without refreshing, the leakage would eventually cause the stored bits to flip, leading to data corruption. The periodic refresh ensures data integrity over time.</li>
+</ul>
+<p>Inspired by: <a href="https://medium.com/@ankur_anand/a-visual-guide-to-golang-memory-allocator-from-ground-up-e132258453ed" target="_blank" rel="noopener noreferrer">https://medium.com/@ankur_anand/a-visual-guide-to-golang-memory-allocator-from-ground-up-e132258453ed</a></p>]]></content>
+        <author>
+            <name>Prabhav Dogra</name>
+            <uri>https://github.com/prabhavdogra</uri>
+        </author>
+        <category label="Go" term="Go"/>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Writing your own Goroutines]]></title>
         <id>https://prabhavdogra.github.io/prabhav.tech/blog/diy_goroutines</id>
