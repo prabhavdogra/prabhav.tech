@@ -20,9 +20,27 @@ While exploring how Go manages memory, I stumbled upon an intricate hierarchy th
         - This requires at least three steps (read, compare, write), which take multiple cycles.
     - A single 1GHz CPU can complete one CPU cycle in 1 nanosecond.
     - Similarly, a 3GHz CPU can complete one CPU cycle in 0.33 nanoseconds.
-    - Not Every Operation Takes 1 Cycle
+    - Not every operation takes 1 cycle
         - Simple instructions like integer addition (a + b) may take 1 cycle.
         - More complex operations (e.g., division, memory access) can take multiple cycles.
+
+![Clock edge](image.png)
+
+**NOTE:** Here **Period = Clock Cycle**
+
+**Clock edge**
+A clock edge refers to the transition point of a clock signal where changes in a digital circuit occur. The clock signal is a periodic waveform (square wave), and it has two main edges:
+- **Rising Edge (Positive Edge)**
+    - The transition from low (0) to high (1).
+    - Many digital circuits, including registers and flip-flops, are designed to capture input and update their state on this edge.
+- **Falling Edge (Negative Edge)**
+    - The transition from high (1) to low (0).
+    - Some circuits use this edge for synchronization, though it is less common than the rising edge.
+
+**Why is the Clock Edge Important?**
+- It synchronizes operations in digital circuits.
+- Registers and flip-flops capture and store data only on a specific edge, ensuring controlled data flow.
+- In CPU pipelines, clock edges trigger different stages like instruction fetch, decode, execute, etc.
 
 
 ## Understanding Computer Memory Hierarchy
@@ -30,26 +48,26 @@ While exploring how Go manages memory, I stumbled upon an intricate hierarchy th
     - Located inside the CPU, closest to the execution units.
     - Stores data for immediate operations (e.g., arithmetic calculations).
     - Extremely small (few bytes) but operates at CPU clock speed.
-    - Access time: 1 CPU cycle (fastest).
+    - **Access time:** 1 CPU cycle (fastest).
 2. **L1 Cache (Level 1)**
     * Smallest and fastest cache (typically 32KB to 128KB per core).
     * Directly integrated into the CPU core.
-    * Stores frequently used instructions and data for ultra*fast access.
-    * Access time: 2-4 CPU cycles.
+    * Stores frequently used instructions (will discuss this later) and data for ultrafast access.
+    * **Access time:** 2-4 CPU cycles.
 3. **L2 Cache (Level 2)**
     - Larger than L1 (256KB to a few MB per core).
     - Slightly slower than L1 but still much faster than RAM.
     - Used to store recently accessed data that might be needed again soon.
-    - Access time: 10-20 CPU cycles.
+    - **Access time:** 10-20 CPU cycles.
 4. **L3 Cache (Level 3)**
     - Shared among multiple CPU cores, ranging from a few MB to tens of MB.
     - Acts as a buffer between L2 and RAM, reducing latency for core-to-core communication.
-    - Access time: 30-60 CPU cycles.
+    - **Access time:** 30-60 CPU cycles.
 5. **RAM (Random Access Memory)**
     - Main working memory for the system (GBs in size).
     - Much slower than CPU caches but holds more data.
     - Stores active processes and data that aren’t frequently used by the CPU.
-    - Access time: 100+ CPU cycles.
+    - **Access time:** 100+ CPU cycles.
 
 ## Registers: The Fastest Storage
 ### What Are Registers?
@@ -61,12 +79,12 @@ Registers are ultra-fast, small storage units embedded directly inside a compute
 - **Storing Results:** The result (8) is placed into another register, which can either be used for further operations or written back to RAM.
 
 1. **Basic Structure: Flip-Flops**
-    - **Core Component:** Registers are built using D-type flip-flops, which store one bit each. A 32-bit register, for example, contains 32 flip-flops.
+    - **Core Component:** Registers are built using D-type flip-flops, each flip-flop just stores one bit. A 32-bit register, for example, contains 32 flip-flops.
     - **Function:** Each flip-flop has:
         - **Data Input (D):** Receives the bit to store.
-        - **Clock Input (CLK):** Synchronizes when the input is captured. This means that data is not stored immediately when placed on the input but is instead captured only when the clock signal triggers.
+        - **Write Enable (WE):** Controls whether the flip-flop should capture and store the input value on the next active clock edge.
+        - **Clock Input (CLK):** Provides the timing signal that synchronizes when data is captured by the flip-flop. The flip-flop updates its value on the rising edge of the clock.
         - **Output (Q):** Provides the stored bit.
-        - **Write Enable (WE):** Determines if the flip-flop updates its value on the next CPU cycle
 
 2. **Data Storage and Clock Synchronization**
 
@@ -74,7 +92,7 @@ Registers are ultra-fast, small storage units embedded directly inside a compute
     * When the CPU writes to a register:
         * The write enable signal for the register is activated.
         * Data is placed on the **input bus**.  The input bus is a set of electrical connections that carry data to the register.
-        * In the **next CPU Cycle**, the flip-flops capture the input values.
+        * In the **next rising edge of the clock**, the flip-flops capture the input values.
 
     **Reading Data:**
     1. **Stored Data in Flip-Flops**
