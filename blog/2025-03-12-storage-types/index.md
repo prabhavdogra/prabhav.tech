@@ -103,10 +103,10 @@ Registers are ultra-fast, small storage units embedded directly inside a compute
         - A tri-state buffer is a special circuit that can either:
             - **Tri-State Buffer Enabled:** Passes the stored data from the register to the bus connecting CPU and register.
             - **Tri-State Buffer Disabled:** Disconnects the register from bus connecting CPU and register.
-        - This is necessary because multiple registers share the same internal bus, and only one should be active at a time to avoid conflicting reads and writes.
+        - This is necessary because multiple registers share the same internal bus, and only one should be active at a time to avoid conflicting reads and writes (more of a hardware constraint).
         - The enable signal is synchronized with the CPU clock to ensure stable data transfer.
 
-### Types of Registers
+### Types of Registers (A little extra context)
 - **General-Purpose Registers:**
     - Used for temporary data storage and most calculations.
 - **Special-Purpose Registers:**
@@ -230,5 +230,3 @@ Imagine a single memory cell in your computer’s RAM (the temporary memory your
 - When a cell is **“charged” (1)** or **“discharged” (0)**, that state is maintained only temporarily because the charge leaks away.
 - The **DRAM controller (or memory controller)** periodically reads each memory cell and then rewrites (recharges) it to restore the original value. This **refresh cycle** typically occurs every 64–128 milliseconds for all cells.
 - Without refreshing, the leakage would eventually cause the stored bits to flip, leading to data corruption. The periodic refresh ensures data integrity over time.
-
-Inspired by: https://medium.com/@ankur_anand/a-visual-guide-to-golang-memory-allocator-from-ground-up-e132258453ed
