@@ -157,14 +157,14 @@ A clock edge refers to the transition point of a clock signal where changes in a
 <li><strong>Tri-State Buffer Disabled:</strong> Disconnects the register from bus connecting CPU and register.</li>
 </ul>
 </li>
-<li>This is necessary because multiple registers share the same internal bus, and only one should be active at a time to avoid conflicting reads and writes.</li>
+<li>This is necessary because multiple registers share the same internal bus, and only one should be active at a time to avoid conflicting reads and writes (more of a hardware constraint).</li>
 <li>The enable signal is synchronized with the CPU clock to ensure stable data transfer.</li>
 </ul>
 </li>
 </ol>
 </li>
 </ol>
-<h3 class="anchor anchorWithStickyNavbar_LWe7" id="types-of-registers">Types of Registers<a href="https://prabhavdogra.github.io/prabhav.tech/blog/memory_hierarchy#types-of-registers" class="hash-link" aria-label="Direct link to Types of Registers" title="Direct link to Types of Registers">​</a></h3>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="types-of-registers-a-little-extra-context">Types of Registers (A little extra context)<a href="https://prabhavdogra.github.io/prabhav.tech/blog/memory_hierarchy#types-of-registers-a-little-extra-context" class="hash-link" aria-label="Direct link to Types of Registers (A little extra context)" title="Direct link to Types of Registers (A little extra context)">​</a></h3>
 <ul>
 <li><strong>General-Purpose Registers:</strong>
 <ul>
@@ -386,8 +386,7 @@ If the CPU wants to save a 0, the Data Line drains the capacitor instead.</li>
 <li>When a cell is <strong>“charged” (1)</strong> or <strong>“discharged” (0)</strong>, that state is maintained only temporarily because the charge leaks away.</li>
 <li>The <strong>DRAM controller (or memory controller)</strong> periodically reads each memory cell and then rewrites (recharges) it to restore the original value. This <strong>refresh cycle</strong> typically occurs every 64–128 milliseconds for all cells.</li>
 <li>Without refreshing, the leakage would eventually cause the stored bits to flip, leading to data corruption. The periodic refresh ensures data integrity over time.</li>
-</ul>
-<p>Inspired by: <a href="https://medium.com/@ankur_anand/a-visual-guide-to-golang-memory-allocator-from-ground-up-e132258453ed" target="_blank" rel="noopener noreferrer">https://medium.com/@ankur_anand/a-visual-guide-to-golang-memory-allocator-from-ground-up-e132258453ed</a></p>]]></content:encoded>
+</ul>]]></content:encoded>
             <category>Go</category>
         </item>
         <item>
