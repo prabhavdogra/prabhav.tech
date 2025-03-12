@@ -30,12 +30,36 @@
 </li>
 <li>A single 1GHz CPU can complete one CPU cycle in 1 nanosecond.</li>
 <li>Similarly, a 3GHz CPU can complete one CPU cycle in 0.33 nanoseconds.</li>
-<li>Not Every Operation Takes 1 Cycle<!-- -->
+<li>Not every operation takes 1 cycle<!-- -->
 <ul>
 <li>Simple instructions like integer addition (a + b) may take 1 cycle.</li>
 <li>More complex operations (e.g., division, memory access) can take multiple cycles.</li>
 </ul>
 </li>
+</ul>
+<p><img decoding="async" loading="lazy" alt="Clock edge" src="data:image/png;base64,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" width="616" height="202" class="img_ev3q"></p>
+<p><strong>NOTE:</strong> Here <strong>Period = Clock Cycle</strong></p>
+<p><strong>Clock edge</strong>
+A clock edge refers to the transition point of a clock signal where changes in a digital circuit occur. The clock signal is a periodic waveform (square wave), and it has two main edges:</p>
+<ul>
+<li><strong>Rising Edge (Positive Edge)</strong>
+<ul>
+<li>The transition from low (0) to high (1).</li>
+<li>Many digital circuits, including registers and flip-flops, are designed to capture input and update their state on this edge.</li>
+</ul>
+</li>
+<li><strong>Falling Edge (Negative Edge)</strong>
+<ul>
+<li>The transition from high (1) to low (0).</li>
+<li>Some circuits use this edge for synchronization, though it is less common than the rising edge.</li>
+</ul>
+</li>
+</ul>
+<p><strong>Why is the Clock Edge Important?</strong></p>
+<ul>
+<li>It synchronizes operations in digital circuits.</li>
+<li>Registers and flip-flops capture and store data only on a specific edge, ensuring controlled data flow.</li>
+<li>In CPU pipelines, clock edges trigger different stages like instruction fetch, decode, execute, etc.</li>
 </ul>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="understanding-computer-memory-hierarchy">Understanding Computer Memory Hierarchy<a href="https://prabhavdogra.github.io/prabhav.tech/blog/memory_hierarchy#understanding-computer-memory-hierarchy" class="hash-link" aria-label="Direct link to Understanding Computer Memory Hierarchy" title="Direct link to Understanding Computer Memory Hierarchy">​</a></h2>
 <ol>
@@ -44,15 +68,15 @@
 <li>Located inside the CPU, closest to the execution units.</li>
 <li>Stores data for immediate operations (e.g., arithmetic calculations).</li>
 <li>Extremely small (few bytes) but operates at CPU clock speed.</li>
-<li>Access time: 1 CPU cycle (fastest).</li>
+<li><strong>Access time:</strong> 1 CPU cycle (fastest).</li>
 </ul>
 </li>
 <li><strong>L1 Cache (Level 1)</strong>
 <ul>
 <li>Smallest and fastest cache (typically 32KB to 128KB per core).</li>
 <li>Directly integrated into the CPU core.</li>
-<li>Stores frequently used instructions and data for ultra*fast access.</li>
-<li>Access time: 2-4 CPU cycles.</li>
+<li>Stores frequently used instructions (will discuss this later) and data for ultrafast access.</li>
+<li><strong>Access time:</strong> 2-4 CPU cycles.</li>
 </ul>
 </li>
 <li><strong>L2 Cache (Level 2)</strong>
@@ -60,14 +84,14 @@
 <li>Larger than L1 (256KB to a few MB per core).</li>
 <li>Slightly slower than L1 but still much faster than RAM.</li>
 <li>Used to store recently accessed data that might be needed again soon.</li>
-<li>Access time: 10-20 CPU cycles.</li>
+<li><strong>Access time:</strong> 10-20 CPU cycles.</li>
 </ul>
 </li>
 <li><strong>L3 Cache (Level 3)</strong>
 <ul>
 <li>Shared among multiple CPU cores, ranging from a few MB to tens of MB.</li>
 <li>Acts as a buffer between L2 and RAM, reducing latency for core-to-core communication.</li>
-<li>Access time: 30-60 CPU cycles.</li>
+<li><strong>Access time:</strong> 30-60 CPU cycles.</li>
 </ul>
 </li>
 <li><strong>RAM (Random Access Memory)</strong>
@@ -75,7 +99,7 @@
 <li>Main working memory for the system (GBs in size).</li>
 <li>Much slower than CPU caches but holds more data.</li>
 <li>Stores active processes and data that aren’t frequently used by the CPU.</li>
-<li>Access time: 100+ CPU cycles.</li>
+<li><strong>Access time:</strong> 100+ CPU cycles.</li>
 </ul>
 </li>
 </ol>
@@ -92,13 +116,13 @@
 <li>
 <p><strong>Basic Structure: Flip-Flops</strong></p>
 <ul>
-<li><strong>Core Component:</strong> Registers are built using D-type flip-flops, which store one bit each. A 32-bit register, for example, contains 32 flip-flops.</li>
+<li><strong>Core Component:</strong> Registers are built using D-type flip-flops, each flip-flop just stores one bit. A 32-bit register, for example, contains 32 flip-flops.</li>
 <li><strong>Function:</strong> Each flip-flop has:<!-- -->
 <ul>
 <li><strong>Data Input (D):</strong> Receives the bit to store.</li>
-<li><strong>Clock Input (CLK):</strong> Synchronizes when the input is captured. This means that data is not stored immediately when placed on the input but is instead captured only when the clock signal triggers.</li>
+<li><strong>Write Enable (WE):</strong> Controls whether the flip-flop should capture and store the input value on the next active clock edge.</li>
+<li><strong>Clock Input (CLK):</strong> Provides the timing signal that synchronizes when data is captured by the flip-flop. The flip-flop updates its value on the rising edge of the clock.</li>
 <li><strong>Output (Q):</strong> Provides the stored bit.</li>
-<li><strong>Write Enable (WE):</strong> Determines if the flip-flop updates its value on the next CPU cycle</li>
 </ul>
 </li>
 </ul>
@@ -111,7 +135,7 @@
 <ul>
 <li>The write enable signal for the register is activated.</li>
 <li>Data is placed on the <strong>input bus</strong>.  The input bus is a set of electrical connections that carry data to the register.</li>
-<li>In the <strong>next CPU Cycle</strong>, the flip-flops capture the input values.</li>
+<li>In the <strong>next rising edge of the clock</strong>, the flip-flops capture the input values.</li>
 </ul>
 </li>
 </ul>
