@@ -171,15 +171,14 @@ Exploring `sync.Once` from **Go 1.18** to **Go 1.24** shows how a small, funda
     - Minimized lock contention by atomically checking the flag on the fast path
 
 * **Go 1.24**
-    * Embeds noCopy to catch accidental copies via go vet
-    * Switches to atomic.Uint32, providing a clean, method‑based API
+    * Embeds `noCopy` to catch accidental copies via go vet
+    * Switches to `atomic.Uint32`, providing a clean, method‑based API
+
 Along the way we’ve seen:
 - **Bootstrapping** – how Go builds itself from source via make.bash
 - **Atomic vs. mutex** – why lock‑free fast paths matter in high‑concurrency code
 - **Static analysis** – how noCopy and go vet help prevent subtle bugs
 
 The beauty of Go’s standard library is that it balances performance, safety, and readability. Whenever you have a question about how Go works under the hood, the answer is just a GitHub clone and a make.bash away. Dive into the source, follow the code, and you’ll not only solve your doubts—you’ll discover deeper principles that make Go such a pleasure to work with.
+
 And it’s downright fun to see how these technologies evolve over time.
-
-[Go 1.19 Release Notes](https://tip.golang.org/doc/go1.19)
-
