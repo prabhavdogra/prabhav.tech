@@ -135,20 +135,19 @@ What's changed now?</p>
 <ul>
 <li><strong>Go&nbsp;1.24</strong>
 <ul>
-<li>Embeds noCopy to catch accidental copies via go vet</li>
-<li>Switches to atomic.Uint32, providing a clean, method‑based API
-Along the way we’ve seen:</li>
+<li>Embeds <code>noCopy</code> to catch accidental copies via go vet</li>
+<li>Switches to <code>atomic.Uint32</code>, providing a clean, method‑based API</li>
 </ul>
 </li>
 </ul>
+<p>Along the way we’ve seen:</p>
 <ul>
 <li><strong>Bootstrapping</strong> – how Go builds itself from source via make.bash</li>
 <li><strong>Atomic vs. mutex</strong> – why lock‑free fast paths matter in high‑concurrency code</li>
 <li><strong>Static analysis</strong> – how noCopy and go vet help prevent subtle bugs</li>
 </ul>
-<p>The beauty of Go’s standard library is that it balances performance, safety, and readability. Whenever you have a question about how Go works under the hood, the answer is just a GitHub clone and a make.bash away. Dive into the source, follow the code, and you’ll not only solve your doubts—you’ll discover deeper principles that make Go such a pleasure to work with.
-And it’s downright fun to see how these technologies evolve over time.</p>
-<p><a href="https://tip.golang.org/doc/go1.19" target="_blank" rel="noopener noreferrer">Go 1.19 Release Notes</a></p>]]></content:encoded>
+<p>The beauty of Go’s standard library is that it balances performance, safety, and readability. Whenever you have a question about how Go works under the hood, the answer is just a GitHub clone and a make.bash away. Dive into the source, follow the code, and you’ll not only solve your doubts—you’ll discover deeper principles that make Go such a pleasure to work with.</p>
+<p>And it’s downright fun to see how these technologies evolve over time.</p>]]></content:encoded>
             <category>Go</category>
         </item>
         <item>
