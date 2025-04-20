@@ -5,7 +5,7 @@
 <meta name="generator" content="Docusaurus v3.7.0">
 <title data-rh="true">Prabhav Dogra - 5 posts | Hello!</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://prabhavdogra.github.io/prabhav.tech/img/docusaurus-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://prabhavdogra.github.io/prabhav.tech/img/docusaurus-social-card.jpg"><meta data-rh="true" property="og:url" content="https://prabhavdogra.github.io/prabhav.tech/blog/authors/prabhavdogra"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" property="og:title" content="Prabhav Dogra - 5 posts | Hello!"><meta data-rh="true" name="docusaurus_tag" content="blog_authors_posts"><meta data-rh="true" name="docsearch:docusaurus_tag" content="blog_authors_posts"><link data-rh="true" rel="icon" href="/prabhav.tech/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://prabhavdogra.github.io/prabhav.tech/blog/authors/prabhavdogra"><link data-rh="true" rel="alternate" href="https://prabhavdogra.github.io/prabhav.tech/blog/authors/prabhavdogra" hreflang="en"><link data-rh="true" rel="alternate" href="https://prabhavdogra.github.io/prabhav.tech/blog/authors/prabhavdogra" hreflang="x-default"><link rel="alternate" type="application/rss+xml" href="/prabhav.tech/blog/rss.xml" title="Hello! RSS Feed">
 <link rel="alternate" type="application/atom+xml" href="/prabhav.tech/blog/atom.xml" title="Hello! Atom Feed"><link rel="stylesheet" href="/prabhav.tech/assets/css/styles.99dca371.css">
-<script src="/prabhav.tech/assets/js/runtime~main.099ae5d7.js" defer="defer"></script>
+<script src="/prabhav.tech/assets/js/runtime~main.71b3a693.js" defer="defer"></script>
 <script src="/prabhav.tech/assets/js/main.750994dc.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -101,7 +101,7 @@ What&#x27;s changed now?</p>
 <ul>
 <li>It&#x27;a a zero-size struct that is adds no memory overhead.</li>
 <li>Go has a statical analysis tool <code>go vet</code> that checks your Go source code for common mistakes and suspicious constructs that the compiler won’t catch.</li>
-<li>Some types must never be copied once they’ve been initialized—most notably synchronization primitives like sync.Mutex, sync.Once, etc. Accidental copies can lead to deadlocks or data races.</li>
+<li>Some types must never be copied once they’ve been initialized—most notably synchronization primitives like <code>sync.Mutex</code>, <code>sync.Once</code>, etc. Accidental copies can lead to deadlocks or data races.</li>
 <li>Having <code>noCopy</code> embedded in your struct will produce a warning if your type is ever copied by <code>go vet</code>.</li>
 </ul>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="regular-uint32-vs-atomicuint32">Regular uint32 vs. atomic.Uint32<a href="#regular-uint32-vs-atomicuint32" class="hash-link" aria-label="Direct link to Regular uint32 vs. atomic.Uint32" title="Direct link to Regular uint32 vs. atomic.Uint32">​</a></h4>
@@ -117,7 +117,7 @@ What&#x27;s changed now?</p>
 <blockquote>
 <p>A Go 1.19+ wrapper type around a uint32 that provides methods for atomic operations</p>
 </blockquote>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="conclusion">Conclusion:<a href="#conclusion" class="hash-link" aria-label="Direct link to Conclusion:" title="Direct link to Conclusion:">​</a></h2>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="conclusion">Conclusion<a href="#conclusion" class="hash-link" aria-label="Direct link to Conclusion" title="Direct link to Conclusion">​</a></h2>
 <p>Exploring <code>sync.Once</code> from <strong>Go 1.18</strong> to <strong>Go 1.24</strong> shows how a small, fundamental primitive can evolve for clarity, safety, and maintainability:</p>
 <ul>
 <li><strong>Go 1.18</strong>
