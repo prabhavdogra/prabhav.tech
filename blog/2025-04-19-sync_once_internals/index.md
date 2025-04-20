@@ -130,7 +130,7 @@ What's changed now?
 #### "noCopy" What's that?
 - It'a a zero-size struct that is adds no memory overhead.
 - Go has a statical analysis tool `go vet` that checks your Go source code for common mistakes and suspicious constructs that the compiler won’t catch.
-- Some types must never be copied once they’ve been initialized—most notably synchronization primitives like sync.Mutex, sync.Once, etc. Accidental copies can lead to deadlocks or data races.
+- Some types must never be copied once they’ve been initialized—most notably synchronization primitives like `sync.Mutex`, `sync.Once`, etc. Accidental copies can lead to deadlocks or data races.
 - Having `noCopy` embedded in your struct will produce a warning if your type is ever copied by `go vet`.
 
 #### Regular uint32 vs. atomic.Uint32
@@ -163,8 +163,7 @@ Ok, seems like it's just a wrapper type provides methods for atomic operations.
 And that is exactly what `atomic.Uint32` is:
 > A Go 1.19+ wrapper type around a uint32 that provides methods for atomic operations
 
-## Conclusion:
-
+## Conclusion
 Exploring `sync.Once` from **Go 1.18** to **Go 1.24** shows how a small, fundamental primitive can evolve for clarity, safety, and maintainability:
 
 - **Go 1.18**
