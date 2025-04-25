@@ -14,7 +14,7 @@
         <updated>2025-04-19T00:00:00.000Z</updated>
         <summary type="html"><![CDATA[How it started?]]></summary>
         <content type="html"><![CDATA[<h3 class="anchor anchorWithStickyNavbar_LWe7" id="how-it-started">How it started?<a href="https://prabhavdogra.github.io/prabhav.tech/blog/sync_once#how-it-started" class="hash-link" aria-label="Direct link to How it started?" title="Direct link to How it started?">​</a></h3>
-<p>While writing some concurrent code for <a href="https://blinkit.com/" target="_blank" rel="noopener noreferrer">Blinkit</a>, I found myself reaching for <code>sync.Once</code>—a common utility in Go to ensure an action is performed just once, no matter how many goroutines attempt it. Out of curiosity, I decided to dig into how <code>sync.Once</code> works internally and how its implementation has evolved over time.</p>
+<p>While writing some concurrent code for <a href="https://blinkit.com/" target="_blank" rel="noopener noreferrer">Blinkit</a>, I found myself reaching for <code>sync.Once</code>—a common utility in Go to ensure an action is performed just once, no matter how many goroutines attempt it. Out of curiosity, I decided to dig into how <code>sync.Once</code> works internally and how its implementation has evolved over time. While investigating the internals I came across something interesting and ended up contributing myself — a small step, but super rewarding!</p>
 <p>In this blog, I’ll walk through the internals of <code>sync.Once</code>, how it leverages atomics for performance, and trace its evolution through Go versions. This blog is meant to motivate you to explore and solve your own doubts by diving into the source code of Go itself. You’ll be amazed at how much you can learn just by following the code and seeing how things work behind the scenes!</p>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="prerequisites-whats-synconce">Prerequisites: What's sync.Once?<a href="https://prabhavdogra.github.io/prabhav.tech/blog/sync_once#prerequisites-whats-synconce" class="hash-link" aria-label="Direct link to Prerequisites: What's sync.Once?" title="Direct link to Prerequisites: What's sync.Once?">​</a></h3>
 <ul>
@@ -121,6 +121,12 @@ What's changed now?</p>
 <blockquote>
 <p>A Go&nbsp;1.19+ wrapper type around a uint32 that provides methods for atomic operations</p>
 </blockquote>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="bonus-go-125-hopefully">Bonus: Go. 1.25 (Hopefully)<a href="https://prabhavdogra.github.io/prabhav.tech/blog/sync_once#bonus-go-125-hopefully" class="hash-link" aria-label="Direct link to Bonus: Go. 1.25 (Hopefully)" title="Direct link to Bonus: Go. 1.25 (Hopefully)">​</a></h3>
+<p>While exploring the internals of <code>sync.Once</code>, I noticed that the done field — which indicates whether the function has already been executed — was originally an <code>atomic.Uint32</code>.</p>
+<p>However, since it’s only ever used as a boolean flag (0 or 1), I realized it could be more semantically clear to use <code>atomic.Bool</code> instead. Even though atomic.Bool is just a thin wrapper around a uint32 under the hood, switching to it makes the code more self-explanatory and aligns better with the intent of the field.
+So I decided to raise a PR and it got merged <code>:)</code></p>
+<p>Now the struct looks like this:</p>
+<div class="language-go codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockTitle_Ktv7">src/sync/once.go | GOVERSION=1.25</div><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-go codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token keyword" style="color:#00009f">type</span><span class="token plain"> Once </span><span class="token keyword" style="color:#00009f">struct</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">{</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">	</span><span class="token boolean" style="color:#36acaa">_</span><span class="token plain"> noCopy</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">	done atomic</span><span class="token punctuation" style="color:#393A34">.</span><span class="token plain">Bool</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">	m    Mutex</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token punctuation" style="color:#393A34">}</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="conclusion">Conclusion<a href="https://prabhavdogra.github.io/prabhav.tech/blog/sync_once#conclusion" class="hash-link" aria-label="Direct link to Conclusion" title="Direct link to Conclusion">​</a></h2>
 <p>Exploring <code>sync.Once</code> from <strong>Go&nbsp;1.18</strong> to <strong>Go&nbsp;1.24</strong> shows how a small, fundamental primitive can evolve for clarity, safety, and maintainability:</p>
 <ul>
@@ -132,10 +138,17 @@ What's changed now?</p>
 </li>
 </ul>
 <ul>
-<li><strong>Go&nbsp;1.24</strong>
+<li>
+<p><strong>Go&nbsp;1.24</strong></p>
 <ul>
 <li>Embeds <code>noCopy</code> to catch accidental copies via go vet</li>
 <li>Switches to <code>atomic.Uint32</code>, providing a clean, method‑based API</li>
+</ul>
+</li>
+<li>
+<p><strong>Go&nbsp;1.25</strong></p>
+<ul>
+<li>Switches <code>atomic.Uint32</code> to <code>atomic.Bool</code></li>
 </ul>
 </li>
 </ul>
