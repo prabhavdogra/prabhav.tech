@@ -6,9 +6,9 @@ tags: [go]
 ---
 
 ### How it started?
-While writing some concurrent code for [Blinkit](https://blinkit.com/), I found myself reaching for `sync.Once`—a common utility in Go to ensure an action is performed just once, no matter how many goroutines attempt it. Out of curiosity, I decided to dig into how `sync.Once` works internally and how its implementation has evolved over time.
+While writing some concurrent code for [Blinkit](https://blinkit.com/), I found myself reaching for `sync.Once`—a common utility in Go to ensure an action is performed just once, no matter how many goroutines attempt it. Out of curiosity, I decided to dig into how `sync.Once` works internally and how its implementation has evolved over time. While investigating the internals I came across something interesting and ended up contributing myself — a small step, but super rewarding!
 
-In this blog, I’ll walk through the internals of `sync.Once`, how it leverages atomics for performance, and trace its evolution through Go versions. This blog is meant to motivate you to explore and solve your own doubts by diving into the source code of Go itself. You’ll be amazed at how much you can learn just by following the code and seeing how things work behind the scenes!
+In this blog, I’ll walk through the internals of `sync.Once`, how it leverages atomics for performance, and trace its evolution through Go versions. This blog is meant to motivate you to explore and solve your own doubts by diving into the source code of Go itself. You’ll be amazed at how much you can learn just by following the code and seeing how things work behind the scenes! 
 
 ### Prerequisites: What's sync.Once?
 
@@ -163,6 +163,22 @@ Ok, seems like it's just a wrapper type provides methods for atomic operations.
 And that is exactly what `atomic.Uint32` is:
 > A Go 1.19+ wrapper type around a uint32 that provides methods for atomic operations
 
+### Bonus: Go. 1.25 (Hopefully)
+While exploring the internals of `sync.Once`, I noticed that the done field — which indicates whether the function has already been executed — was originally an `atomic.Uint32`. 
+
+However, since it’s only ever used as a boolean flag (0 or 1), I realized it could be more semantically clear to use `atomic.Bool` instead. Even though atomic.Bool is just a thin wrapper around a uint32 under the hood, switching to it makes the code more self-explanatory and aligns better with the intent of the field.
+So I decided to raise a PR and it got merged `:)`
+
+Now the struct looks like this:
+
+```go title="src/sync/once.go | GOVERSION=1.25"
+type Once struct {
+	_ noCopy
+	done atomic.Bool
+	m    Mutex
+}
+```
+
 ## Conclusion
 Exploring `sync.Once` from **Go 1.18** to **Go 1.24** shows how a small, fundamental primitive can evolve for clarity, safety, and maintainability:
 
@@ -173,6 +189,9 @@ Exploring `sync.Once` from **Go 1.18** to **Go 1.24** shows how a small, funda
 * **Go 1.24**
     * Embeds `noCopy` to catch accidental copies via go vet
     * Switches to `atomic.Uint32`, providing a clean, method‑based API
+
+* **Go 1.25**
+    * Switches `atomic.Uint32` to `atomic.Bool`
 
 Along the way we’ve seen:
 - **Bootstrapping** – how Go builds itself from source via make.bash
