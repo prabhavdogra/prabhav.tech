@@ -180,7 +180,7 @@ type Once struct {
 ```
 
 ## Conclusion
-Exploring `sync.Once` from **Go 1.18** to **Go 1.24** shows how a small, fundamental primitive can evolve for clarity, safety, and maintainability:
+Exploring `sync.Once` from **Go 1.18** to **Go 1.25** shows how a small, fundamental primitive can evolve for clarity, safety, and maintainability:
 
 - **Go 1.18**
     - Used a plain uint32 flag plus a Mutex and double‑checked locking
